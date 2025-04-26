@@ -1,0 +1,231 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Define ground type constants
+#define GROUND_TYPE_WATER 0
+#define GROUND_TYPE_SAND  1
+#define GROUND_TYPE_GRASS 2
+#define GROUND_TYPE_ROCK  3
+
+// Add new ground types for resources
+#define GROUND_TYPE_COAL     4
+#define GROUND_TYPE_IRON     5
+#define GROUND_TYPE_COPPER   6
+
+// Structure to hold grid cell data
+struct GridCell {
+    int groundType;
+    float3 color;
+    int resourceType;    // 0: none, 1: coal, 2: iron, 3: copper, 4: stone
+    int resourceAmount; // Amount of resource remaining (0-1)
+};
+
+RWStructuredBuffer<GridCell> GridBuffer : register(u0);
+RWTexture2D<float4> Result : register(u1);
+
+// Shader parameters
+// Add to Parameters buffer
+cbuffer Parameters : register(b0) {
+    uint gridWidth;
+    uint gridHeight;
+    float time;
+    float waterLevel;
+    float waterFrequency;
+    float terrainScale;
+    float coalFrequency;
+    float coalThreshold;
+    float coalRichness;
+    float ironFrequency;
+    float ironThreshold;
+    float ironRichness;
+    float copperFrequency;
+    float copperThreshold;
+    float copperRichness;
+    float stoneFrequency;    // Add stone parameters
+    float stoneThreshold;
+    float stoneRichness;
+    float seed;
+    // Add starting area parameters
+    float startingAreaEnabled; // 0 = disabled, 1 = enabled
+    float startingAreaRadius;  // Radius of the starting area
+    float resourcePatchSize;   // Size of each resource patch
+}
+
+// Perlin noise helper functions
+float2 hash2(float2 p)
+{
+    float2 r = mul(float2x2(127.1, 311.7, 269.5, 183.3), p);
+    return frac(sin(r) * 43758.5453);
+}
+
+float perlin2D(float2 p)
+{
+    float2 pi = floor(p);
+    float2 pf = frac(p);
+    
+    float2 w = pf * pf * (3.0 - 2.0 * pf);
+    
+    float n00 = dot(hash2(pi + float2(0.0, 0.0)) * 2.0 - 1.0, pf - float2(0.0, 0.0));
+    float n01 = dot(hash2(pi + float2(0.0, 1.0)) * 2.0 - 1.0, pf - float2(0.0, 1.0));
+    float n10 = dot(hash2(pi + float2(1.0, 0.0)) * 2.0 - 1.0, pf - float2(1.0, 0.0));
+    float n11 = dot(hash2(pi + float2(1.0, 1.0)) * 2.0 - 1.0, pf - float2(1.0, 1.0));
+    
+    float n0 = lerp(n00, n01, w.y);
+    float n1 = lerp(n10, n11, w.y);
+    
+    return lerp(n0, n1, w.x) * 0.5 + 0.5;
+}
+
+float3 GetGroundTypeColor(int type) {
+    switch (type) {
+        case GROUND_TYPE_WATER:
+            return float3(0.0, 0.4, 0.8);    // Blue for water
+        case GROUND_TYPE_SAND:
+            return float3(0.76, 0.7, 0.5);   // Beige for sand
+        case GROUND_TYPE_GRASS:
+            return float3(0.2, 0.6, 0.2);    // Green for grass
+        case GROUND_TYPE_ROCK:
+            return float3(0.5, 0.5, 0.5);    // Gray for rock
+        default:
+            return float3(0.0, 0.0, 0.0);
+    }
+}
+
+float3 GetResourceColor(int type) {
+    switch (type) {
+        case 1: // Coal
+            return float3(0.2, 0.2, 0.2);    // Dark gray
+        case 2: // Iron
+            return float3(0.7, 0.4, 0.3);    // Rusty brown
+        case 3: // Copper
+            return float3(0.8, 0.5, 0.2);    // Copper orange
+        case 4: // Stone
+            return float3(0.6, 0.6, 0.6);    // Light gray
+        default:
+            return float3(1.0, 1.0, 1.0);    // White for unknown
+    }
+}
+
+// Add a function to generate resource patches
+float resourceNoise(float2 pos, float frequency, float seed) {
+    return perlin2D(pos * frequency + seed);
+}
+
+// Function to check if a point is in a resource patch
+bool IsInResourcePatch(uint2 pos, float2 patchCenter, float patchSize) {
+    float distSq = pow(pos.x - patchCenter.x, 2) + pow(pos.y - patchCenter.y, 2);
+    return distSq <= patchSize * patchSize;
+}
+
+// In your CSMain function, modify the ground type assignment:
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= gridWidth || id.y >= gridHeight)
+        return;
+        
+    uint index = id.y * gridWidth + id.x;
+    
+    // Generate terrain data
+    float2 waterPos = float2(id.xy) * waterFrequency + seed;
+    float noiseValue = perlin2D(waterPos);
+    
+    // Generate resource noise patterns with frequency and richness
+    float2 pos = float2(id.xy);
+    float coalNoise = resourceNoise(pos, coalFrequency, seed + 42.0);
+    float ironNoise = resourceNoise(pos, ironFrequency, seed + 123.0);
+    float copperNoise = resourceNoise(pos, copperFrequency, seed + 789.0);
+    float stoneNoise = resourceNoise(pos, stoneFrequency, seed + 456.0);
+    
+    GridCell cell;
+    cell.resourceType = 0;
+    cell.resourceAmount = 0;
+    
+    // Water and terrain generation - uncommented to generate all ground types
+    if (noiseValue < waterLevel) {
+        cell.groundType = GROUND_TYPE_WATER;
+    }
+    else if (noiseValue < waterLevel + 0.1) {
+        cell.groundType = GROUND_TYPE_SAND;
+    }
+    else {
+        cell.groundType = GROUND_TYPE_GRASS;
+        
+        // Resource generation with thresholds
+        // In the CSMain kernel or wherever your resource generation logic is
+        float2 centerPos = float2(gridWidth / 2.0, gridHeight / 2.0); // Center of the grid
+        float2 currentPos = float2(id.x, id.y);
+        float distanceFromCenter = length(currentPos - centerPos);
+        
+        // Only generate resources if we're in the starting area and starting area is enabled
+        if (startingAreaEnabled > 0.5 && distanceFromCenter <= startingAreaRadius) {
+        // Resource generation logic
+        if (coalNoise > coalThreshold) { 
+        cell.resourceType = 1; // Coal 
+        cell.resourceAmount = coalNoise * coalRichness; 
+        } 
+        else if (ironNoise > ironThreshold) { 
+        cell.resourceType = 2; // Iron 
+        cell.resourceAmount = ironNoise * ironRichness; 
+        } 
+        else if (copperNoise > copperThreshold) { 
+        cell.resourceType = 3; // Copper 
+        cell.resourceAmount = copperNoise * copperRichness; 
+        } 
+        else if (stoneNoise > stoneThreshold) { 
+        cell.resourceType = 4; // Stone 
+        cell.resourceAmount = stoneNoise * stoneRichness; 
+        }
+        } else {
+        // No resources outside the starting area
+        cell.resourceType = 0;
+        cell.resourceAmount = 0;
+        }
+    }
+    
+    // Add starting area resource patches if enabled
+    if (startingAreaEnabled > 0.5) {
+        float2 center = float2(gridWidth / 2, gridHeight / 2);
+        float patchRadius = resourcePatchSize;
+        
+        // Create 4 resource patches in a circle around the center
+        // Increase this value to spread patches further from center
+        float distFromCenter = startingAreaRadius * 0.7; // Use 70% of the radius (was 0.5)
+        
+        for (int i = 0; i < 4; i++) {
+            float angle = (i * 3.14159 * 2.0) / 4.0;
+            
+            // Calculate patch center position
+            float2 patchCenter = center + float2(cos(angle), sin(angle)) * distFromCenter;
+            
+            // Check if current pixel is in this patch
+            float dist = length(float2(id.xy) - patchCenter);
+            if (dist <= patchRadius && cell.groundType != GROUND_TYPE_WATER) {
+                // Resource amount decreases from center of patch
+                float resourceAmount = 1.0 - (dist / patchRadius) * 0.5;
+                
+                // Set resource type based on patch index (i+1 matches resource types)
+                cell.resourceType = i + 1;
+                cell.resourceAmount = resourceAmount * 100.0; // Scale up for richness
+            }
+        }
+    }
+    
+    cell.color = GetGroundTypeColor(cell.groundType);
+    
+    // Store in grid buffer
+    GridBuffer[index] = cell;
+    
+    // Update texture with proper alpha
+    float4 color = float4(cell.color, 1.0);  // Ensure alpha is 1.0
+    
+    // Modify color based on resource while preserving alpha
+    if (cell.resourceType > 0 && cell.resourceAmount > 0)
+    {
+        float3 resourceColor = GetResourceColor(cell.resourceType);
+        color.rgb = lerp(color.rgb, resourceColor, cell.resourceAmount * 0.7 / 100.0);
+        color.a = 1.0;  // Ensure alpha stays at 1.0
+    }
+    
+    Result[id.xy] = color;
+}
