@@ -96,9 +96,9 @@ public class PlayerInventory : MonoBehaviour
     {
         Dictionary<int, int> result = new Dictionary<int, int>();
         
-        foreach (var kvp in resources)
+        foreach (var kvp in inventory)
         {
-            result[kvp.Key] = kvp.Value;
+            result[kvp.Key] = (int)kvp.Value;
         }
         
         return result;
@@ -106,15 +106,15 @@ public class PlayerInventory : MonoBehaviour
     
     public void LoadInventory(Dictionary<int, int> savedInventory)
     {
-        resources.Clear();
+        inventory.Clear();
         
         foreach (var kvp in savedInventory)
         {
-            resources[kvp.Key] = kvp.Value;
+            inventory[kvp.Key] = kvp.Value;
         }
         
-        // Update UI if needed
-        UpdateUI();
+        // Notify UI to update
+        OnInventoryChanged?.Invoke();
     }
     
     // Event for UI updates

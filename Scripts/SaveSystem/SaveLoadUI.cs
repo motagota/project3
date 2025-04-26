@@ -6,6 +6,7 @@ public class SaveLoadUI : MonoBehaviour
     [Header("UI References")]
     public Button saveButton;
     public Button loadButton;
+    public Button newGameButton;
     public Text statusText;
     
     private SaveManager saveManager;
@@ -30,14 +31,24 @@ public class SaveLoadUI : MonoBehaviour
         {
             loadButton.onClick.AddListener(LoadGame);
         }
-        
+
+        if (newGameButton != null)
+        {
+            newGameButton.onClick.AddListener(NewGame);
+        }
         // Clear status text
         if (statusText != null)
         {
             statusText.text = "";
         }
     }
-    
+
+    private void NewGame()
+    {
+        // Load the game scene
+        UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+    }
+
     private void SaveGame()
     {
         if (saveManager != null)
