@@ -286,4 +286,14 @@ public class GridTile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         return hasBeenModified;
     }
+
+    public void UpdateCellData(int groundType, int resourceType, int resourceAmount)
+    {
+        // Assuming you have fields or properties for these
+        this.groundType = groundType;
+        this.resourceType = resourceType;
+        this.resourceAmount = resourceAmount;
+    
+        // If you need to update visuals or trigger events, do it here
+    }
 }
