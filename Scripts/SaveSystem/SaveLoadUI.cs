@@ -5,6 +5,7 @@ public class SaveLoadUI : MonoBehaviour
 {
     [Header("UI References")]
     public Button saveButton;
+    public Button exitButton;
     public Button loadButton;
     public Button newGameButton;
     public Text statusText;
@@ -36,11 +37,21 @@ public class SaveLoadUI : MonoBehaviour
         {
             newGameButton.onClick.AddListener(NewGame);
         }
+        
+        if (exitButton != null)
+        {
+            newGameButton.onClick.AddListener(ExitGame);
+        }
         // Clear status text
         if (statusText != null)
         {
             statusText.text = "";
         }
+    }
+
+    private void ExitGame()
+    {
+        
     }
 
     private void NewGame()
