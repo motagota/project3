@@ -38,7 +38,9 @@ public class TerrainGenerationUI : MonoBehaviour
     public Slider stoneThresholdSlider;
     public Slider stoneRichnessSlider;
 
-    [Header("Game Controls")] public Button startGameButton;
+    [Header("Game Controls")] 
+    public Button startGameButton;
+    public Button backButton;
 
     private void Start()
     {
@@ -52,11 +54,21 @@ public class TerrainGenerationUI : MonoBehaviour
         SetupListeners();
         UpdateAllTexts();
 
-        // Add start game button listener
         if (startGameButton != null)
         {
             startGameButton.onClick.AddListener(OnStartGame);
         }
+        
+        if (startGameButton != null)
+        {
+           backButton.onClick.AddListener(OnBackGame);
+        }
+    }
+
+    private void OnBackGame()
+    {
+        // Load the game scene
+        UnityEngine.SceneManagement.SceneManager.LoadScene("SaveLoadScene");
     }
 
     private void InitializeUI()
