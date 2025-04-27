@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8940781069193308418}
   - component: {fileID: 1147263447892844460}
   - component: {fileID: 6877298791263790533}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: MinerPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,3 +124,4 @@ MonoBehaviour:
   miningRate: 0.1
   resourceCapacity: 10
   miningEffect: {fileID: 0}
+  activeLightIndicator: {fileID: 0}

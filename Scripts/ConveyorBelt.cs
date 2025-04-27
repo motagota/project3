@@ -24,13 +24,11 @@ public class ConveyorBelt : MonoBehaviour
     private List<ConveyorItem> itemsOnFarLane = new List<ConveyorItem>();
     private List<ConveyorItem> itemsOnCloseLane = new List<ConveyorItem>();
     
-    // Connected conveyors
-    private ConveyorBelt nextConveyor;
-    private ConveyorBelt previousConveyor;
-    
-    // Side connections
-    private ConveyorBelt leftSideConnection;
-    private ConveyorBelt rightSideConnection;
+    // List of connectors attached to this conveyor
+    private List<ConveyorConnector> connectedConnectors = new List<ConveyorConnector>();
+    // Lists for input and output connectors
+    private List<ConveyorConnector> inputConnectors = new List<ConveyorConnector>();
+    private List<ConveyorConnector> outputConnectors = new List<ConveyorConnector>();
     
     private void Update()
     {
@@ -84,110 +82,6 @@ public class ConveyorBelt : MonoBehaviour
         }
     }
     
-    public bool AcceptItem(ConveyorItem item, bool toFarLane)
-    {
-        // Check if we can accept an item (implement logic for backpressure)
-        List<ConveyorItem> targetLane = toFarLane ? itemsOnFarLane : itemsOnCloseLane;
-        
-        // Simple check: don't allow items too close to each other
-        foreach (var existingItem in targetLane)
-        {
-            if (Vector3.Distance(existingItem.transform.position, inputPoint.position) < 0.5f)
-            {
-                return false; // Too crowded
-            }
-        }
-        
-        // Accept the item
-        item.transform.position = inputPoint.position;
-        targetLane.Add(item);
-        return true;
-    }
-    
-    private bool TransferItemToNextConveyor(ConveyorItem item, bool fromFarLane)
-    {
-        // Try to transfer to the next inline conveyor
-        if (nextConveyor != null)
-        {
-            // Determine which lane to target based on connection type
-            bool toFarLane = DetermineTargetLane(fromFarLane);
-            
-            if (nextConveyor.AcceptItem(item, toFarLane))
-            {
-                return true;
-            }
-        }
-        
-        // If inline transfer failed, try side connections based on lane
-        if (fromFarLane && rightSideConnection != null)
-        {
-            if (rightSideConnection.AcceptItem(item, true)) // Always to far lane for side connections
-            {
-                return true;
-            }
-        }
-        else if (!fromFarLane && leftSideConnection != null)
-        {
-            if (leftSideConnection.AcceptItem(item, true))
-            {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    private bool DetermineTargetLane(bool fromFarLane)
-    {
-        // Logic to determine which lane to target on the next conveyor
-        // This depends on the relative orientation of the conveyors
-        
-        // For now, a simple implementation: maintain the same lane
-        return fromFarLane;
-    }
-    
-    public void ConnectToConveyor(ConveyorBelt other, ConveyorConnectionType connectionType)
-    {
-        switch (connectionType)
-        {
-            case ConveyorConnectionType.Next:
-                nextConveyor = other;
-                other.previousConveyor = this;
-                break;
-                
-            case ConveyorConnectionType.Previous:
-                previousConveyor = other;
-                other.nextConveyor = this;
-                break;
-                
-            case ConveyorConnectionType.LeftSide:
-                leftSideConnection = other;
-                // Determine which side connection to use on the other conveyor
-                if (Mathf.Abs(direction - other.direction) % 2 == 0)
-                {
-                    other.rightSideConnection = this;
-                }
-                else
-                {
-                    other.leftSideConnection = this;
-                }
-                break;
-                
-            case ConveyorConnectionType.RightSide:
-                rightSideConnection = other;
-                // Determine which side connection to use on the other conveyor
-                if (Mathf.Abs(direction - other.direction) % 2 == 0)
-                {
-                    other.leftSideConnection = this;
-                }
-                else
-                {
-                    other.rightSideConnection = this;
-                }
-                break;
-        }
-    }
-    
     public void Rotate()
     {
         // Rotate the conveyor by 90 degrees
@@ -196,49 +90,94 @@ public class ConveyorBelt : MonoBehaviour
         // Update direction
         direction = (direction + 1) % 4;
         
-        // Reset connections when rotated
-        DisconnectAllConveyors();
+        // Update connection points
+        UpdateConnectionPoints();
     }
     
-    private void DisconnectAllConveyors()
+    public void RegisterConnector(ConveyorConnector connector)
     {
-        // Remove this conveyor from all connected conveyors
-        if (nextConveyor != null)
+        if (!connectedConnectors.Contains(connector))
         {
-            nextConveyor.previousConveyor = null;
-            nextConveyor = null;
-        }
-        
-        if (previousConveyor != null)
-        {
-            previousConveyor.nextConveyor = null;
-            previousConveyor = null;
-        }
-        
-        if (leftSideConnection != null)
-        {
-            if (leftSideConnection.rightSideConnection == this)
-                leftSideConnection.rightSideConnection = null;
-            if (leftSideConnection.leftSideConnection == this)
-                leftSideConnection.leftSideConnection = null;
-            leftSideConnection = null;
-        }
-        
-        if (rightSideConnection != null)
-        {
-            if (rightSideConnection.leftSideConnection == this)
-                rightSideConnection.leftSideConnection = null;
-            if (rightSideConnection.rightSideConnection == this)
-                rightSideConnection.rightSideConnection = null;
-            rightSideConnection = null;
+            connectedConnectors.Add(connector);
+            UpdateConnectionPoints();
         }
     }
-}
 
-public enum ConveyorConnectionType
-{
-    Next,
-    Previous,
-    LeftSide,
-    RightSide
+    // Add the missing ConnectToConveyor method
+    public void ConnectToConveyor(ConveyorConnector connector)
+    {
+        // Register the connector with this conveyor
+        RegisterConnector(connector);
+        
+        // Also connect the connector to this conveyor
+        connector.ConnectToConveyor(this);
+    }
+    
+    // Add this method to connect to another conveyor belt
+    public void ConnectToConveyor(ConveyorBelt otherConveyor, ConveyorConnectionType connectionType)
+    {
+        // Implementation for connecting to another conveyor belt
+        Debug.Log($"Connected conveyor at {transform.position} to conveyor at {otherConveyor.transform.position} with type {connectionType}");
+    }
+
+    private void UpdateConnectionPoints()
+    {
+        // Clear existing connections first
+        inputConnectors.Clear();
+        outputConnectors.Clear();
+        
+        // Add logic to set input/output points based on connector positions
+        foreach (ConveyorConnector connector in connectedConnectors)
+        {
+            Vector3 relativePos = transform.InverseTransformPoint(connector.transform.position);
+            
+            if (relativePos.z > 0.5f)
+                outputConnectors.Add(connector);
+            else if (relativePos.z < -0.5f)
+                inputConnectors.Add(connector);
+        }
+    }
+    
+    // Add a method to handle transferring items to the next conveyor through connectors
+    private bool TransferItemToNextConveyor(ConveyorItem item, bool isFarLane)
+    {
+        // Check if we have any output connectors
+        if (outputConnectors.Count > 0)
+        {
+            // For simplicity, just use the first output connector
+            // You could implement more complex logic to choose which connector to use
+            ConveyorConnector outputConnector = outputConnectors[0];
+            
+            if (outputConnector.connectedConveyor != null)
+            {
+                // Transfer to the connected conveyor
+                return outputConnector.connectedConveyor.AcceptItem(item, isFarLane);
+            }
+            else if (outputConnector.connectedBuilding != null)
+            {
+                // Handle transfer to a building
+                // This would need to be implemented based on your building interface
+                return false;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Method to accept an item from another conveyor or building
+    public bool AcceptItem(ConveyorItem item, bool useFarLane)
+    {
+        if (useFarLane)
+        {
+            item.transform.position = inputPoint.position;
+            itemsOnFarLane.Add(item);
+            return true;
+        }
+        else
+        {
+            item.transform.position = inputPoint.position;
+            itemsOnCloseLane.Add(item);
+            return true;
+        }
+    }
 }

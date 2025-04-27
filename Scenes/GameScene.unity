@@ -438,7 +438,7 @@ MonoBehaviour:
     m_Bits: 64
   buildingLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
 --- !u!4 &302893954
 Transform:
   m_ObjectHideFlags: 0

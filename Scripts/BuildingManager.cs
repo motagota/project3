@@ -280,6 +280,31 @@ public class BuildingManager : MonoBehaviour
         currentGhost.transform.rotation = Quaternion.Euler(0, currentRotation, 0);
     }
     
+    // Add this method to connect buildings to nearby connectors
+    private void ConnectToNearbyConnectors(GameObject building, Vector3 position)
+    {
+        // Find all connectors within a certain radius
+        Collider[] colliders = Physics.OverlapSphere(position, 2f, buildingLayer);
+        
+        foreach (var collider in colliders)
+        {
+            ConveyorConnector connector = collider.GetComponent<ConveyorConnector>();
+            if (connector != null)
+            {
+                // Connect the building to the connector
+                connector.ConnectToBuilding(building.GetComponent<MonoBehaviour>());
+                
+                // If this is a conveyor belt, also connect the connector to the conveyor
+                ConveyorBelt conveyor = building.GetComponent<ConveyorBelt>();
+                if (conveyor != null)
+                {
+                    connector.ConnectToConveyor(conveyor);
+                }
+            }
+        }
+    }
+    
+    // Modify your PlaceBuilding method to call the new connection method
     private void PlaceBuilding()
     {
         if (currentGhost == null) return;
@@ -314,76 +339,61 @@ public class BuildingManager : MonoBehaviour
                 building = Instantiate(conveyorConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
                 
                 // Set up the connector
-                ConveyorConnector connector = building.GetComponent<ConveyorConnector>();
-                if (connector != null)
+                ConveyorConnector newConnector = building.GetComponent<ConveyorConnector>();
+                if (newConnector != null)
                 {
-                    // Find nearby building to connect to
-                    ConnectToNearbyBuilding(connector);
-                    
-                    // Find nearby conveyor to connect to
-                    ConnectToNearbyConveyor(connector);
+                    // Find nearby buildings to connect to
+                    ConnectConnectorToNearbyBuildings(newConnector, building.transform.position);
                 }
                 break;
         }
         
+        // Connect the new building to any nearby connectors
         if (building != null)
         {
-            building.name = selectedBuilding.ToString();
-            
-            // Get the tile under the building
-            Ray ray = new Ray(building.transform.position + Vector3.up, Vector3.down);
-            RaycastHit hit;
-            
-            // Use the gridTileLayer mask to only hit grid tiles
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, gridTileLayer))
+            ConnectToNearbyConnectors(building, building.transform.position);
+        }
+        
+        building.name = selectedBuilding.ToString();
+        
+        // Get the tile under the building
+        Ray ray = new Ray(building.transform.position + Vector3.up, Vector3.down);
+        RaycastHit hit;
+        
+        // Use the gridTileLayer mask to only hit grid tiles
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, gridTileLayer))
+        {
+            GridTile tile = hit.collider.GetComponent<GridTile>();
+            if (tile != null)
             {
-                GridTile tile = hit.collider.GetComponent<GridTile>();
-                if (tile != null)
+                // Link building to tile based on type
+                if (selectedBuilding == BuildingType.Miner)
                 {
-                    // Link building to tile based on type
-                    if (selectedBuilding == BuildingType.Miner)
+                    MinerBuilding miner = building.GetComponent<MinerBuilding>();
+                    if (miner != null)
                     {
-                        MinerBuilding miner = building.GetComponent<MinerBuilding>();
-                        if (miner != null)
-                        {
-                            miner.Initialize(tile);
-                            Debug.Log($"Miner initialized with tile at position {tile.transform.position}");
-                        }
-                    }
-                    else if (selectedBuilding == BuildingType.StorageBox)
-                    {
-                        StorageBox storage = building.GetComponent<StorageBox>();
-                        if (storage != null)
-                        {
-                            storage.Initialize(tile);
-                            Debug.Log($"Storage box initialized with tile at position {tile.transform.position}");
-                        }
+                        miner.Initialize(tile);
+                        Debug.Log($"Miner initialized with tile at position {tile.transform.position}");
                     }
                 }
-                else
+                else if (selectedBuilding == BuildingType.StorageBox)
                 {
-                    Debug.LogError("Hit object doesn't have a GridTile component!");
+                    StorageBox storage = building.GetComponent<StorageBox>();
+                    if (storage != null)
+                    {
+                        storage.Initialize(tile);
+                        Debug.Log($"Storage box initialized with tile at position {tile.transform.position}");
+                    }
                 }
             }
             else
             {
-                Debug.LogError("Failed to find a grid tile under the building!");
+                Debug.LogError("Hit object doesn't have a GridTile component!");
             }
-        }
-        
-        // For conveyor belts, don't reset selection to allow continuous placement
-        if (selectedBuilding != BuildingType.ConveyorBelt)
-        {
-            CancelPlacement();
         }
         else
         {
-            // For conveyor belts, just update the ghost's position and validity
-            if (lastHoveredTile != null)
-            {
-                canPlace = IsValidPlacement(lastHoveredTile);
-                UpdateGhostColor(canPlace);
-            }
+            Debug.LogError("Failed to find a grid tile under the building!");
         }
     }
     
@@ -460,31 +470,46 @@ public class BuildingManager : MonoBehaviour
         }
     }
     
-    private void ConnectToNearbyBuilding(ConveyorConnector connector)
+    private void ConnectConnectorToNearbyBuildings(ConveyorConnector connector, Vector3 position)
     {
-        // Find nearby buildings (miners or storage boxes)
-        Collider[] nearbyBuildings = Physics.OverlapSphere(connector.transform.position, 1.0f, buildingLayer);
+        // Find all buildings within a certain radius
+        Collider[] colliders = Physics.OverlapSphere(position, 2f, buildingLayer);
         
-        foreach (var collider in nearbyBuildings)
+        foreach (var collider in colliders)
         {
+            // Skip the connector itself
+            if (collider.gameObject == connector.gameObject)
+                continue;
+                
+            // Check for conveyor belts
+            ConveyorBelt conveyor = collider.GetComponent<ConveyorBelt>();
+            if (conveyor != null)
+            {
+                connector.ConnectToConveyor(conveyor);
+                conveyor.RegisterConnector(connector); // New line
+                Debug.Log("Connector connected to conveyor belt");
+                continue; // Skip to next collider after connecting
+            }
+            
+            // Check for other buildings (miners, storage boxes, etc.)
             MinerBuilding miner = collider.GetComponent<MinerBuilding>();
             if (miner != null)
             {
                 connector.ConnectToBuilding(miner);
-                Debug.Log("Connector attached to miner");
-                break;
+                Debug.Log("Connector connected to miner");
+                continue;
             }
             
             StorageBox storage = collider.GetComponent<StorageBox>();
             if (storage != null)
             {
                 connector.ConnectToBuilding(storage);
-                Debug.Log("Connector");
-                break;
+                Debug.Log("Connector connected to storage box");
+                continue;
             }
         }
     }
-    
+
     private void ConnectToNearbyConveyor(ConveyorConnector connector)
     {
         // Find nearby conveyor belts
@@ -495,8 +520,8 @@ public class BuildingManager : MonoBehaviour
             ConveyorBelt conveyor = collider.GetComponent<ConveyorBelt>();
             if (conveyor != null)
             {
-                // Fix: Pass the conveyor instead of the connector
                 connector.ConnectToNearbyConveyor(conveyor);
+                conveyor.RegisterConnector(connector); // New line
                 Debug.Log("Connector attached to conveyor belt");
                 break;
             }

@@ -4,7 +4,7 @@ public class ConveyorConnector : MonoBehaviour
 {
     [Header("Connection Settings")]
     public Transform connectionPoint;
-    public bool isInput = true; // True if this connector receives items, false if it outputs
+    public ConveyorConnectionType connectionType = ConveyorConnectionType.Input; // Replace boolean with enum
     
     [Header("Connected Objects")]
     public ConveyorBelt connectedConveyor;
@@ -16,7 +16,8 @@ public class ConveyorConnector : MonoBehaviour
     
     // Track which lane is being used
     private bool usingFarLane = true;
-    
+    private bool isInput;
+
     private void Start()
     {
         // Initialize connector visuals
@@ -28,14 +29,20 @@ public class ConveyorConnector : MonoBehaviour
     
     private void Update()
     {
-        if (isInput && connectedConveyor != null && connectedBuilding != null)
+        if (connectionType == ConveyorConnectionType.Input && connectedConveyor != null && connectedBuilding != null)
         {
             // Handle input logic (building to conveyor)
             HandleInputLogic();
         }
-        else if (!isInput && connectedConveyor != null && connectedBuilding != null)
+        else if (connectionType == ConveyorConnectionType.Output && connectedConveyor != null && connectedBuilding != null)
         {
             // Handle output logic (conveyor to building)
+            HandleOutputLogic();
+        }
+        else if (connectionType == ConveyorConnectionType.Bidirectional && connectedConveyor != null && connectedBuilding != null)
+        {
+            // Handle bidirectional logic if needed
+            HandleInputLogic();
             HandleOutputLogic();
         }
     }
@@ -141,6 +148,7 @@ public class ConveyorConnector : MonoBehaviour
         else if (renderer != null)
         {
             // Default color based on type
+            
             renderer.material.color = isInput ? Color.green : Color.red;
         }
         
