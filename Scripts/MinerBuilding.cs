@@ -13,8 +13,8 @@ public class MinerBuilding : MonoBehaviour
     public GameObject activeLightIndicator; // Optional visual indicator for active state
     
     private GridTile targetTile;
-    private int resourceType;
-    private int storedResources = 0; // Changed to int for whole numbers
+    public int ResourceType { get; private set; }
+    public int StoredResources { get; set; } = 0;
     private bool isOperating = false;
     
     // For tracking partial resources until we have a whole unit
@@ -38,11 +38,11 @@ public class MinerBuilding : MonoBehaviour
         try
         {
             GridComputeManager.GridCell cellData = tile.GetCellData();
-            resourceType = cellData.resourceType;
+            ResourceType = cellData.resourceType;
             windowID = GetInstanceID();
             
             // Start mining if there's a valid resource
-            if (resourceType > 0 && cellData.resourceAmount > 0)
+            if (ResourceType > 0 && cellData.resourceAmount > 0)
             {
                 // Auto-start is now optional - we'll let the player decide
                 // StartMining();
@@ -106,7 +106,7 @@ public class MinerBuilding : MonoBehaviour
         while (isOperating)
         {
             // Check if we have capacity
-            if (storedResources < resourceCapacity)
+            if (StoredResources < resourceCapacity)
             {
                 // Mine resources
                 float mineAmount = miningRate * Time.deltaTime;
@@ -127,11 +127,11 @@ public class MinerBuilding : MonoBehaviour
                             if (partialResources >= 1.0f)
                             {
                                 int wholeUnits = Mathf.FloorToInt(partialResources);
-                                storedResources += wholeUnits;
+                                StoredResources += wholeUnits;
                                 partialResources -= wholeUnits;
                                 
                                 // Clamp to capacity
-                                storedResources = Mathf.Min(storedResources, Mathf.FloorToInt(resourceCapacity));
+                                StoredResources = Mathf.Min(StoredResources, Mathf.FloorToInt(resourceCapacity));
                             }
                         }
                         else
@@ -197,9 +197,9 @@ public class MinerBuilding : MonoBehaviour
         }
         
         // Display resource type and amount
-        string resourceName = StorageBox.GetResourceName(resourceType);
+        string resourceName = StorageBox.GetResourceName(ResourceType);
         GUILayout.Label($"Mining: {resourceName}");
-        GUILayout.Label($"Stored: {storedResources} / {Mathf.FloorToInt(resourceCapacity)}");
+        GUILayout.Label($"Stored: {StoredResources} / {Mathf.FloorToInt(resourceCapacity)}");
         
         // Show progress to next whole unit
         GUILayout.Label($"Progress to next unit: {partialResources:P0}");
@@ -221,7 +221,7 @@ public class MinerBuilding : MonoBehaviour
         GUI.enabled = true;
         
         // Collect button
-        GUI.enabled = storedResources > 0;
+        GUI.enabled = StoredResources > 0;
         if (GUILayout.Button("Collect Resources"))
         {
             CollectResources();
@@ -240,13 +240,13 @@ public class MinerBuilding : MonoBehaviour
     
     private void CollectResources()
     {
-        if (storedResources > 0 && PlayerInventory.Instance != null)
+        if (StoredResources > 0 && PlayerInventory.Instance != null)
         {
             // Try to add to player inventory
-            if (PlayerInventory.Instance.AddResource(resourceType, storedResources))
+            if (PlayerInventory.Instance.AddResource(ResourceType, StoredResources))
             {
                 // Successfully added to inventory
-                storedResources = 0;
+                StoredResources = 0;
             }
             else
             {
@@ -265,12 +265,12 @@ public class MinerBuilding : MonoBehaviour
     
     public int GetResourceType()
     {
-        return resourceType;
+        return ResourceType;
     }
     
     public int GetStoredResources()
     {
-        return storedResources;
+        return StoredResources;
     }
     
     public float GetPartialResources()
@@ -285,7 +285,7 @@ public class MinerBuilding : MonoBehaviour
     
     public void SetStoredResources(int amount)
     {
-        storedResources = amount;
+        StoredResources = amount;
     }
     
     public void SetPartialResources(float amount)
