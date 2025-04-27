@@ -40,7 +40,7 @@ public class SaveLoadUI : MonoBehaviour
         
         if (exitButton != null)
         {
-            newGameButton.onClick.AddListener(ExitGame);
+            exitButton.onClick.AddListener(ExitGame);
         }
         // Clear status text
         if (statusText != null)
@@ -51,7 +51,14 @@ public class SaveLoadUI : MonoBehaviour
 
     private void ExitGame()
     {
+       // Quit the application
+        Debug.Log("Exiting game");
+        Application.Quit();
         
+        // This line will only be reached in the Unity Editor since Application.Quit() doesn't work there
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #endif
     }
 
     private void NewGame()
