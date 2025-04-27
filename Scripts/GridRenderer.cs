@@ -5,11 +5,7 @@ using UnityEngine.Tilemaps;
 public class GridRenderer : MonoBehaviour
 {
     private GridComputeManager gridManager;
-    public Tilemap tilemap;
-    public TileBase waterTile;
-    public TileBase sandTile;
-    public TileBase grassTile;
-    public TileBase rockTile;
+   
     private GridComputeManager.GridCell[,] gridData;  // Changed from GridCell to GridComputeManager.GridCell
 
     private void Start()
@@ -40,36 +36,8 @@ public class GridRenderer : MonoBehaviour
                 GridComputeManager.GridCell cell = rawGridData[y * gridManager.gridWidth + x];
                 gridData[x, y] = cell;
                 
-                // Set the base tile type
-                TileBase tileToUse = null;
-                switch (cell.groundType)
-                {
-                    case 0: // Water
-                        tileToUse = waterTile;
-                        break;
-                    case 1: // Sand
-                        tileToUse = sandTile;
-                        break;
-                    case 2: // Grass
-                        tileToUse = grassTile;
-                        break;
-                    case 3: // Rock
-                        tileToUse = rockTile;
-                        break;
-                }
-                
-                if (tileToUse != null)
-                {
-                    tilemap.SetTile(tilePosition, tileToUse);
-                    
-                    // If there's a resource, tint the tile
-                    if (cell.resourceType > 0 && cell.resourceAmount > 0)
-                    {
-                        Color tintColor = GetResourceColor(cell.resourceType);
-                        tilemap.SetTileFlags(tilePosition, TileFlags.None);
-                        tilemap.SetColor(tilePosition, Color.Lerp(Color.white, tintColor, cell.resourceAmount * 0.7f));
-                    }
-                }
+             
+           
             }
         }
     }
@@ -108,8 +76,7 @@ public class GridRenderer : MonoBehaviour
                 if (cell.resourceType > 0)
                 {
                     Color tintColor = GetResourceColor(cell.resourceType);
-                    tilemap.SetTileFlags(tilePosition, TileFlags.None);
-                    tilemap.SetColor(tilePosition, Color.Lerp(Color.white, tintColor, cell.resourceAmount * 0.7f));
+                   
                 }
             }
         }

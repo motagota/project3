@@ -487,7 +487,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69e7e3c75b89534f9ac3fdd7291000b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saveButton: {fileID: 989952211}
+  saveButton: {fileID: 0}
   exitButton: {fileID: 989952211}
   loadButton: {fileID: 1602282521}
   newGameButton: {fileID: 20871232}

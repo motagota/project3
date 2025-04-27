@@ -457,6 +457,7 @@ GameObject:
   - component: {fileID: 563435248}
   - component: {fileID: 563435247}
   - component: {fileID: 563435246}
+  - component: {fileID: 563435250}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -566,6 +567,21 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &563435250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563435244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76cfabad88eb9bc48a81ef3d9afc8f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveFileName: gamedata.sav
+  autoSave: 1
+  autoSaveInterval: 300
 --- !u!1 &753372491
 GameObject:
   m_ObjectHideFlags: 0
@@ -2127,7 +2143,7 @@ GameObject:
   - component: {fileID: 2031437903}
   - component: {fileID: 2031437902}
   m_Layer: 0
-  m_Name: PlayerObject
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

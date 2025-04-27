@@ -5,9 +5,47 @@ using UnityEngine;
 [Serializable]
 public class SaveData
 {
-    // Player data
-    public Vector3 playerPosition;
-    public Quaternion playerRotation;
+    // Serializable versions of Unity types
+    [Serializable]
+    public struct SerializableVector3
+    {
+        public float x, y, z;
+        
+        public SerializableVector3(Vector3 vector)
+        {
+            x = vector.x;
+            y = vector.y;
+            z = vector.z;
+        }
+        
+        public Vector3 ToVector3()
+        {
+            return new Vector3(x, y, z);
+        }
+    }
+    
+    [Serializable]
+    public struct SerializableQuaternion
+    {
+        public float x, y, z, w;
+        
+        public SerializableQuaternion(Quaternion quaternion)
+        {
+            x = quaternion.x;
+            y = quaternion.y;
+            z = quaternion.z;
+            w = quaternion.w;
+        }
+        
+        public Quaternion ToQuaternion()
+        {
+            return new Quaternion(x, y, z, w);
+        }
+    }
+    
+    // Player data - use serializable types
+    public SerializableVector3 playerPosition;
+    public SerializableQuaternion playerRotation;
     public Dictionary<int, int> playerInventory = new Dictionary<int, int>();
     
     // Building data
@@ -23,8 +61,8 @@ public class SaveData
     public class BuildingData
     {
         public string buildingType;
-        public Vector3 position;
-        public Quaternion rotation;
+        public SerializableVector3 position;
+        public SerializableQuaternion rotation;
         public int gridX;
         public int gridY;
         

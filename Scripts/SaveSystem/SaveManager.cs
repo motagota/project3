@@ -49,8 +49,8 @@ public class SaveManager : MonoBehaviour
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
-                saveData.playerPosition = player.transform.position;
-                saveData.playerRotation = player.transform.rotation;
+                saveData.playerPosition = new SaveData.SerializableVector3(player.transform.position);
+                saveData.playerRotation = new SaveData.SerializableQuaternion(player.transform.rotation);
                 
                 // Save player inventory
                 PlayerInventory inventory = PlayerInventory.Instance;
@@ -108,8 +108,8 @@ public class SaveManager : MonoBehaviour
                 GameObject player = GameObject.FindGameObjectWithTag("Player");
                 if (player != null)
                 {
-                    player.transform.position = saveData.playerPosition;
-                    player.transform.rotation = saveData.playerRotation;
+                    player.transform.position = saveData.playerPosition.ToVector3();
+                    player.transform.rotation = saveData.playerRotation.ToQuaternion();
                     
                     // Load player inventory
                     PlayerInventory inventory = PlayerInventory.Instance;
@@ -147,8 +147,8 @@ public class SaveManager : MonoBehaviour
             SaveData.BuildingData buildingData = new SaveData.BuildingData
             {
                 buildingType = "Miner",
-                position = miner.transform.position,
-                rotation = miner.transform.rotation,
+                position = new SaveData.SerializableVector3(miner.transform.position),
+                rotation = new SaveData.SerializableQuaternion(miner.transform.rotation),
                 resourceType = miner.GetResourceType(),
                 storedResources = miner.GetStoredResources(),
                 isOperating = miner.IsOperating(),
@@ -172,8 +172,8 @@ public class SaveManager : MonoBehaviour
             SaveData.BuildingData buildingData = new SaveData.BuildingData
             {
                 buildingType = "StorageBox",
-                position = box.transform.position,
-                rotation = box.transform.rotation,
+                position = new SaveData.SerializableVector3(box.transform.position),
+                rotation = new SaveData.SerializableQuaternion(box.transform.rotation),
                 storedItems = box.GetSerializableStorage()
             };
             
@@ -206,10 +206,10 @@ public class SaveManager : MonoBehaviour
             switch (buildingData.buildingType)
             {
                 case "Miner":
-                    building = Instantiate(buildingManager.minerPrefab, buildingData.position, buildingData.rotation);
+                    building = Instantiate(buildingManager.minerPrefab, buildingData.position.ToVector3(), buildingData.rotation.ToQuaternion());
                     break;
                 case "StorageBox":
-                    building = Instantiate(buildingManager.storageBoxPrefab, buildingData.position, buildingData.rotation);
+                    building = Instantiate(buildingManager.storageBoxPrefab, buildingData.position.ToVector3(), buildingData.rotation.ToQuaternion());
                     break;
             }
             
