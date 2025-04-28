@@ -12,18 +12,18 @@ public class MinerBuilding : MonoBehaviour
     public GameObject miningEffect; // Optional particle effect
     public GameObject activeLightIndicator; // Optional visual indicator for active state
     
-    private GridTile targetTile;
-    public int ResourceType { get; private set; }
-    public int StoredResources { get; set; } = 0;
-    private bool isOperating = false;
+    private GridTile _targetTile;
+    private int ResourceType { get; set; }
+    private int StoredResources { get; set; } = 0;
+    private bool _isOperating = false;
     
     // For tracking partial resources until we have a whole unit
-    private float partialResources = 0f;
+    private float _partialResources = 0f;
     
     // UI interaction
-    private bool showUI = false;
-    private Rect windowRect = new Rect(20, 20, 300, 280); // Increased height for new button
-    private int windowID = 0;
+    private bool _showUI = false;
+    private Rect _windowRect = new Rect(20, 20, 300, 280); // Increased height for new button
+    private int _windowID = 0;
     
     public void Initialize(GridTile tile)
     {
@@ -33,13 +33,13 @@ public class MinerBuilding : MonoBehaviour
             return;
         }
         
-        targetTile = tile;
+        _targetTile = tile;
         
         try
         {
             GridComputeManager.GridCell cellData = tile.GetCellData();
             ResourceType = cellData.resourceType;
-            windowID = GetInstanceID();
+            _windowID = GetInstanceID();
             
             // Start mining if there's a valid resource
             if (ResourceType > 0 && cellData.resourceAmount > 0)
@@ -56,10 +56,10 @@ public class MinerBuilding : MonoBehaviour
     
     public void StartMining()
     {
-        if (isOperating)
+        if (_isOperating)
             return;
             
-        isOperating = true;
+        _isOperating = true;
         
         // Enable mining effect if available
         if (miningEffect != null)
@@ -79,10 +79,10 @@ public class MinerBuilding : MonoBehaviour
     
     public void StopMining()
     {
-        if (!isOperating)
+        if (!_isOperating)
             return;
             
-        isOperating = false;
+        _isOperating = false;
         
         // Disable mining effect if available
         if (miningEffect != null)
@@ -103,7 +103,7 @@ public class MinerBuilding : MonoBehaviour
     
     private IEnumerator MiningProcess()
     {
-        while (isOperating)
+        while (_isOperating)
         {
             // Check if we have capacity
             if (StoredResources < resourceCapacity)
@@ -112,23 +112,23 @@ public class MinerBuilding : MonoBehaviour
                 float mineAmount = miningRate * Time.deltaTime;
                 
                 // Check if the tile still has resources
-                if (targetTile != null)
+                if (_targetTile != null)
                 {
                     try
                     {
-                        GridComputeManager.GridCell cellData = targetTile.GetCellData();
+                        GridComputeManager.GridCell cellData = _targetTile.GetCellData();
                         
                         if (cellData.resourceAmount > 0)
                         {
                             // Add to partial resources
-                            partialResources += mineAmount;
+                            _partialResources += mineAmount;
                             
                             // When we have at least 1 whole unit, add it to stored resources
-                            if (partialResources >= 1.0f)
+                            if (_partialResources >= 1.0f)
                             {
-                                int wholeUnits = Mathf.FloorToInt(partialResources);
+                                int wholeUnits = Mathf.FloorToInt(_partialResources);
                                 StoredResources += wholeUnits;
-                                partialResources -= wholeUnits;
+                                _partialResources -= wholeUnits;
                                 
                                 // Clamp to capacity
                                 StoredResources = Mathf.Min(StoredResources, Mathf.FloorToInt(resourceCapacity));
@@ -169,27 +169,27 @@ public class MinerBuilding : MonoBehaviour
     // UI interaction methods
     private void OnMouseDown()
     {
-        showUI = !showUI;
+        _showUI = !_showUI;
     }
     
     private void OnGUI()
     {
-        if (showUI)
+        if (_showUI)
         {
-            windowRect = GUI.Window(windowID, windowRect, DrawMinerWindow, "Miner Control");
+            _windowRect = GUI.Window(_windowID, _windowRect, DrawMinerWindow, "Miner Control");
         }
     }
     
     private void DrawMinerWindow(int id)
     {
         // Check if target tile is valid
-        if (targetTile == null)
+        if (_targetTile == null)
         {
             GUILayout.Label("ERROR: No valid tile to mine!");
             
             if (GUILayout.Button("Close"))
             {
-                showUI = false;
+                _showUI = false;
             }
             
             GUI.DragWindow();
@@ -202,18 +202,18 @@ public class MinerBuilding : MonoBehaviour
         GUILayout.Label($"Stored: {StoredResources} / {Mathf.FloorToInt(resourceCapacity)}");
         
         // Show progress to next whole unit
-        GUILayout.Label($"Progress to next unit: {partialResources:P0}");
+        GUILayout.Label($"Progress to next unit: {_partialResources:P0}");
         
         // Status indicator
-        string statusText = isOperating ? "Status: <color=green>Active</color>" : "Status: <color=red>Inactive</color>";
+        string statusText = _isOperating ? "Status: <color=green>Active</color>" : "Status: <color=red>Inactive</color>";
         GUILayout.Label(statusText, new GUIStyle(GUI.skin.label) { richText = true });
         
         // Toggle button for active/inactive
-        GUI.enabled = targetTile != null;
-        string toggleButtonText = isOperating ? "Stop Mining" : "Start Mining";
+        GUI.enabled = _targetTile != null;
+        string toggleButtonText = _isOperating ? "Stop Mining" : "Start Mining";
         if (GUILayout.Button(toggleButtonText))
         {
-            if (isOperating)
+            if (_isOperating)
                 StopMining();
             else
                 StartMining();
@@ -231,7 +231,7 @@ public class MinerBuilding : MonoBehaviour
         // Close button
         if (GUILayout.Button("Close"))
         {
-            showUI = false;
+            _showUI = false;
         }
         
         // Make window draggable
@@ -260,7 +260,7 @@ public class MinerBuilding : MonoBehaviour
     // Add these methods to support saving/loading
     public GridTile GetTargetTile()
     {
-        return targetTile;
+        return _targetTile;
     }
     
     public int GetResourceType()
@@ -275,12 +275,12 @@ public class MinerBuilding : MonoBehaviour
     
     public float GetPartialResources()
     {
-        return partialResources;
+        return _partialResources;
     }
     
     public bool IsOperating()
     {
-        return isOperating;
+        return _isOperating;
     }
     
     public void SetStoredResources(int amount)
@@ -290,7 +290,7 @@ public class MinerBuilding : MonoBehaviour
     
     public void SetPartialResources(float amount)
     {
-        partialResources = amount;
+        _partialResources = amount;
     }
     
     // Add method for ConveyorConnector to get items

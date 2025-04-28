@@ -11,7 +11,7 @@ public class GridComputeManager : MonoBehaviour
     // Change these values to 10 for a 10x10 grid
     public int gridWidth = 10;
     public int gridHeight = 10;
-    public ComputeBuffer gridBuffer;
+    public ComputeBuffer GridBuffer;
     public RenderTexture resultTexture;
     public TerrainGenerationParams initTerrainParams;
     [StructLayout(LayoutKind.Sequential)]
@@ -51,7 +51,7 @@ public class GridComputeManager : MonoBehaviour
         }
         
       
-        if (gridBuffer == null)
+        if (GridBuffer == null)
         {
             InitializeCompute();
         }
@@ -111,7 +111,7 @@ public class GridComputeManager : MonoBehaviour
         }
         
         int stride = sizeof(int) + sizeof(float) * 3 + sizeof(int) + sizeof(float);
-        gridBuffer = new ComputeBuffer(gridWidth * gridHeight, stride);
+        GridBuffer = new ComputeBuffer(gridWidth * gridHeight, stride);
     
         // Create render texture for visualization
         resultTexture = new RenderTexture(gridWidth, gridHeight, 0, RenderTextureFormat.ARGB32);
@@ -120,7 +120,7 @@ public class GridComputeManager : MonoBehaviour
     
         // Set compute shader parameters
         int kernelIndex = gridComputeShader.FindKernel("CSMain");
-        gridComputeShader.SetBuffer(kernelIndex, "GridBuffer", gridBuffer);
+        gridComputeShader.SetBuffer(kernelIndex, "GridBuffer", GridBuffer);
         gridComputeShader.SetTexture(kernelIndex, "Result", resultTexture);
         gridComputeShader.SetInt("gridWidth", gridWidth);
         gridComputeShader.SetInt("gridHeight", gridHeight);
@@ -133,10 +133,10 @@ public class GridComputeManager : MonoBehaviour
     
     private void CleanupResources()
     {
-        if (gridBuffer != null)
+        if (GridBuffer != null)
         {
-            gridBuffer.Release();
-            gridBuffer = null;
+            GridBuffer.Release();
+            GridBuffer = null;
         }
         
         if (resultTexture != null)
@@ -150,7 +150,7 @@ public class GridComputeManager : MonoBehaviour
     public void GetGridData(out GridCell[] gridData)
     {
         gridData = new GridCell[gridWidth * gridHeight];
-        gridBuffer.GetData(gridData);
+        GridBuffer.GetData(gridData);
     }
 
     // Method to update time parameter for animations if needed
@@ -170,7 +170,7 @@ public class GridComputeManager : MonoBehaviour
             return;
             
         GridCell[] cells = new GridCell[1];
-        gridBuffer.GetData(cells, 0, x + y * gridWidth, 1);
+        GridBuffer.GetData(cells, 0, x + y * gridWidth, 1);
         
         resourceType = cells[0].resourceType;
         resourceAmount = cells[0].resourceAmount;

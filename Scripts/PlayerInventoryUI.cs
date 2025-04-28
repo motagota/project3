@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 public class PlayerInventoryUI : MonoBehaviour
 {
-    private bool showInventory = false;
-    private Rect inventoryWindowRect = new Rect(Screen.width - 320, 20, 300, 400);
-    private Vector2 scrollPosition;
+    private bool _showInventory = false;
+    private Rect _inventoryWindowRect = new Rect(Screen.width - 320, 20, 300, 400);
+    private Vector2 _scrollPosition;
     
     private void Start()
     {
@@ -30,15 +30,15 @@ public class PlayerInventoryUI : MonoBehaviour
         // Toggle inventory with a key (e.g., I)
         if (Input.GetKeyDown(KeyCode.I))
         {
-            showInventory = !showInventory;
+            _showInventory = !_showInventory;
         }
     }
     
     private void OnGUI()
     {
-        if (showInventory)
+        if (_showInventory)
         {
-            inventoryWindowRect = GUI.Window(100, inventoryWindowRect, DrawInventoryWindow, "Player Inventory");
+            _inventoryWindowRect = GUI.Window(100, _inventoryWindowRect, DrawInventoryWindow, "Player Inventory");
         }
     }
     
@@ -49,7 +49,7 @@ public class PlayerInventoryUI : MonoBehaviour
             GUILayout.Label("Inventory system not initialized!");
             if (GUILayout.Button("Close"))
             {
-                showInventory = false;
+                _showInventory = false;
             }
             return;
         }
@@ -61,7 +61,7 @@ public class PlayerInventoryUI : MonoBehaviour
         GUILayout.Label($"Slots: {PlayerInventory.Instance.GetUsedSlots()} / {PlayerInventory.Instance.maxInventorySlots}");
         
         // Scrollable area for inventory items
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(300));
+        _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(300));
         
         if (inventory.Count == 0)
         {
@@ -86,7 +86,7 @@ public class PlayerInventoryUI : MonoBehaviour
         // Close button
         if (GUILayout.Button("Close"))
         {
-            showInventory = false;
+            _showInventory = false;
         }
         
         // Make window draggable

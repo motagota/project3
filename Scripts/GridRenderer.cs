@@ -4,16 +4,16 @@ using UnityEngine.Tilemaps;
 [RequireComponent(typeof(GridComputeManager))]
 public class GridRenderer : MonoBehaviour
 {
-    private GridComputeManager gridManager;
+    private GridComputeManager _gridManager;
    
-    private GridComputeManager.GridCell[,] gridData;  // Changed from GridCell to GridComputeManager.GridCell
+    private GridComputeManager.GridCell[,] _gridData;  // Changed from GridCell to GridComputeManager.GridCell
 
     private void Start()
     {
-        gridManager = GetComponent<GridComputeManager>();
-        if (gridManager.gridBuffer == null)
+        _gridManager = GetComponent<GridComputeManager>();
+        if (_gridManager.GridBuffer == null)
         {
-            gridManager.InitializeCompute();
+            _gridManager.InitializeCompute();
         }
         GenerateGrid();
     }
@@ -21,20 +21,20 @@ public class GridRenderer : MonoBehaviour
     private void GenerateGrid()
     {
         // Get the grid data
-        GridComputeManager.GridCell[] rawGridData = new GridComputeManager.GridCell[gridManager.gridWidth * gridManager.gridHeight];
-        gridManager.GetGridData(out rawGridData);
+        GridComputeManager.GridCell[] rawGridData = new GridComputeManager.GridCell[_gridManager.gridWidth * _gridManager.gridHeight];
+        _gridManager.GetGridData(out rawGridData);
         
         // Convert to 2D array for easier access
-        gridData = new GridComputeManager.GridCell[gridManager.gridWidth, gridManager.gridHeight];
+        _gridData = new GridComputeManager.GridCell[_gridManager.gridWidth, _gridManager.gridHeight];
         
-        for (int y = 0; y < gridManager.gridHeight; y++)
+        for (int y = 0; y < _gridManager.gridHeight; y++)
         {
-            for (int x = 0; x < gridManager.gridWidth; x++)
+            for (int x = 0; x < _gridManager.gridWidth; x++)
             {
                 // Consistent coordinate calculation
-                Vector3Int tilePosition = new Vector3Int(x - gridManager.gridWidth/2, y - gridManager.gridHeight/2, 0);
-                GridComputeManager.GridCell cell = rawGridData[y * gridManager.gridWidth + x];
-                gridData[x, y] = cell;
+                Vector3Int tilePosition = new Vector3Int(x - _gridManager.gridWidth/2, y - _gridManager.gridHeight/2, 0);
+                GridComputeManager.GridCell cell = rawGridData[y * _gridManager.gridWidth + x];
+                _gridData[x, y] = cell;
                 
              
            
@@ -61,16 +61,16 @@ public class GridRenderer : MonoBehaviour
 
     public void UpdateGrid()
     {
-        GridComputeManager.GridCell[] rawGridData = new GridComputeManager.GridCell[gridManager.gridWidth * gridManager.gridHeight];
-        gridManager.GetGridData(out rawGridData);
+        GridComputeManager.GridCell[] rawGridData = new GridComputeManager.GridCell[_gridManager.gridWidth * _gridManager.gridHeight];
+        _gridManager.GetGridData(out rawGridData);
 
-        for (int y = 0; y < gridManager.gridHeight; y++)
+        for (int y = 0; y < _gridManager.gridHeight; y++)
         {
-            for (int x = 0; x < gridManager.gridWidth; x++)
+            for (int x = 0; x < _gridManager.gridWidth; x++)
             {
-                Vector3Int tilePosition = new Vector3Int(x - gridManager.gridWidth/2, y - gridManager.gridHeight/2, 0);
-                GridComputeManager.GridCell cell = rawGridData[y * gridManager.gridWidth + x];
-                gridData[x, y] = cell;
+                Vector3Int tilePosition = new Vector3Int(x - _gridManager.gridWidth/2, y - _gridManager.gridHeight/2, 0);
+                GridComputeManager.GridCell cell = rawGridData[y * _gridManager.gridWidth + x];
+                _gridData[x, y] = cell;
 
                 // Update tile color for resource changes
                 if (cell.resourceType > 0)

@@ -1,105 +1,106 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SaveLoadUI : MonoBehaviour
+namespace SaveSystem
 {
-    [Header("UI References")]
-    public Button saveButton;
-    public Button exitButton;
-    public Button loadButton;
-    public Button newGameButton;
-    public Text statusText;
+    public class SaveLoadUI : MonoBehaviour
+    {
+        [Header("UI References")]
+        public Button saveButton;
+        public Button exitButton;
+        public Button loadButton;
+        public Button newGameButton;
+        public Text statusText;
     
-    private SaveManager saveManager;
+        private SaveManager _saveManager;
     
-    private void Start()
-    {
-        saveManager = SaveManager.Instance;
-        
-        if (saveManager == null)
+        private void Start()
         {
-            Debug.LogError("SaveManager not found!");
-            return;
-        }
+            _saveManager = SaveManager.Instance;
         
-        // Set up button listeners
-        if (saveButton != null)
-        {
-            saveButton.onClick.AddListener(SaveGame);
-        }
+            if (_saveManager == null)
+            {
+                Debug.LogError("SaveManager not found!");
+                return;
+            }
         
-        if (loadButton != null)
-        {
-            loadButton.onClick.AddListener(LoadGame);
-        }
+            // Set up button listeners
+            if (saveButton != null)
+            {
+                saveButton.onClick.AddListener(SaveGame);
+            }
+        
+            if (loadButton != null)
+            {
+                loadButton.onClick.AddListener(LoadGame);
+            }
 
-        if (newGameButton != null)
-        {
-            newGameButton.onClick.AddListener(NewGame);
-        }
+            if (newGameButton != null)
+            {
+                newGameButton.onClick.AddListener(NewGame);
+            }
         
-        if (exitButton != null)
-        {
-            exitButton.onClick.AddListener(ExitGame);
-        }
-        // Clear status text
-        if (statusText != null)
-        {
-            statusText.text = "";
-        }
-    }
-
-    private void ExitGame()
-    {
-       // Quit the application
-        Debug.Log("Exiting game");
-        Application.Quit();
-        
-        // This line will only be reached in the Unity Editor since Application.Quit() doesn't work there
-        #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-        #endif
-    }
-
-    private void NewGame()
-    {
-        // Load the game scene
-        UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
-    }
-
-    private void SaveGame()
-    {
-        if (saveManager != null)
-        {
-            saveManager.SaveGame();
-            
+            if (exitButton != null)
+            {
+                exitButton.onClick.AddListener(ExitGame);
+            }
+            // Clear status text
             if (statusText != null)
             {
-                statusText.text = "Game saved successfully!";
-                Invoke("ClearStatusText", 3f);
+                statusText.text = "";
             }
         }
-    }
-    
-    private void LoadGame()
-    {
-        if (saveManager != null)
+
+        private void ExitGame()
         {
-            saveManager.LoadGame();
-            
-            if (statusText != null)
+            // Quit the application
+            Debug.Log("Exiting game");
+            Application.Quit();
+        
+            // This line will only be reached in the Unity Editor since Application.Quit() doesn't work there
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        }
+
+        private void NewGame()
+        {
+            // Load the game scene
+            UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+        }
+
+        private void SaveGame()
+        {
+            if (_saveManager != null)
             {
+                _saveManager.SaveGame();
+            
+                if (statusText != null)
+                {
+                    statusText.text = "Game saved successfully!";
+                    Invoke("ClearStatusText", 3f);
+                }
+            }
+        }
+    
+        private void LoadGame()
+        {
+            if (_saveManager != null)
+            {
+                _saveManager.LoadGame();
+
+                if (statusText == null) return;
                 statusText.text = "Game loaded successfully!";
                 Invoke("ClearStatusText", 3f);
             }
         }
-    }
     
-    private void ClearStatusText()
-    {
-        if (statusText != null)
+        private void ClearStatusText()
         {
-            statusText.text = "";
+            if (statusText != null)
+            {
+                statusText.text = "";
+            }
         }
     }
 }

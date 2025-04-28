@@ -3,38 +3,38 @@ using System.Collections.Generic;
 
 public class StorageBoxUI : MonoBehaviour
 {
-    private StorageBox storageBox;
-    private bool showUI = false;
-    private Rect windowRect = new Rect(20, 20, 300, 400);
-    private int windowID;
-    private Vector2 scrollPosition;
+    private StorageBox _storageBox;
+    private bool _showUI = false;
+    private Rect _windowRect = new Rect(20, 20, 300, 400);
+    private int _windowID;
+    private Vector2 _scrollPosition;
     
     private void Start()
     {
-        storageBox = GetComponent<StorageBox>();
-        windowID = GetInstanceID();
+        _storageBox = GetComponent<StorageBox>();
+        _windowID = GetInstanceID();
     }
     
     private void OnMouseDown()
     {
-        showUI = !showUI;
+        _showUI = !_showUI;
     }
     
     private void OnGUI()
     {
-        if (showUI && storageBox != null)
+        if (_showUI && _storageBox != null)
         {
-            windowRect = GUI.Window(windowID, windowRect, DrawStorageWindow, "Storage Box");
+            _windowRect = GUI.Window(_windowID, _windowRect, DrawStorageWindow, "Storage Box");
         }
     }
     
     private void DrawStorageWindow(int id)
     {
         // Display used slots
-        GUILayout.Label($"Slots: {storageBox.GetUsedSlots()} / {storageBox.maxStorageSlots}");
+        GUILayout.Label($"Slots: {_storageBox.GetUsedSlots()} / {_storageBox.maxStorageSlots}");
         
         // Get stored resources
-        Dictionary<int, float> resources = storageBox.GetStoredResources();
+        Dictionary<int, float> resources = _storageBox.GetStoredResources();
         
         // Player inventory section
         GUILayout.Label("Player Inventory:", EditorStyles.boldLabel);
@@ -72,7 +72,7 @@ public class StorageBoxUI : MonoBehaviour
         GUILayout.Label("Storage Contents:", EditorStyles.boldLabel);
         
         // Scrollable area for storage items
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(150));
+        _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(150));
         
         if (resources.Count == 0)
         {
@@ -103,7 +103,7 @@ public class StorageBoxUI : MonoBehaviour
         // Close button
         if (GUILayout.Button("Close"))
         {
-            showUI = false;
+            _showUI = false;
         }
         
         // Make window draggable
@@ -112,7 +112,7 @@ public class StorageBoxUI : MonoBehaviour
     
     private void StoreResource(int resourceType)
     {
-        if (PlayerInventory.Instance == null || storageBox == null)
+        if (PlayerInventory.Instance == null || _storageBox == null)
             return;
             
         // Get the amount from player inventory
@@ -123,7 +123,7 @@ public class StorageBoxUI : MonoBehaviour
             float amount = playerInventory[resourceType];
             
             // Try to add to storage
-            if (storageBox.AddResource(resourceType, amount))
+            if (_storageBox.AddResource(resourceType, amount))
             {
                 // Remove from player inventory
                 PlayerInventory.Instance.RemoveResource(resourceType, amount);
@@ -133,11 +133,11 @@ public class StorageBoxUI : MonoBehaviour
     
     private void TakeResource(int resourceType)
     {
-        if (PlayerInventory.Instance == null || storageBox == null)
+        if (PlayerInventory.Instance == null || _storageBox == null)
             return;
             
         // Get the amount from storage
-        Dictionary<int, float> resources = storageBox.GetStoredResources();
+        Dictionary<int, float> resources = _storageBox.GetStoredResources();
         
         if (resources.ContainsKey(resourceType))
         {
@@ -147,7 +147,7 @@ public class StorageBoxUI : MonoBehaviour
             if (PlayerInventory.Instance.AddResource(resourceType, amount))
             {
                 // Remove from storage
-                storageBox.RemoveResource(resourceType, amount);
+                _storageBox.RemoveResource(resourceType, amount);
             }
         }
     }

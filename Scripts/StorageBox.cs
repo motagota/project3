@@ -8,7 +8,7 @@ public class StorageBox : MonoBehaviour
     public float maxStackSize = 100f;
     
     // Dictionary to store resources: Key = resource type, Value = amount
-    private Dictionary<int, float> storedResources = new Dictionary<int, float>();
+    private readonly Dictionary<int, float> storedResources = new Dictionary<int, float>();
     
     // Resource type names for UI display
     private static readonly string[] ResourceNames = new string[] 

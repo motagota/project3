@@ -253,8 +253,8 @@ public class BuildingManager : MonoBehaviour
         // Reset positions first
         inputObject.localPosition = new Vector3(-0.25f, 0, 0);
         outputObject.localPosition = new Vector3(0.25f, 0, 0);
-        
-        bool foundInputConnection = false;
+
+        var foundInputConnection = false;
         bool foundOutputConnection = false;
         GameObject inputConnectedObject = null;
         GameObject outputConnectedObject = null;

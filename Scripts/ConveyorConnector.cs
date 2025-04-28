@@ -25,18 +25,18 @@ public class ConveyorConnector : MonoBehaviour
     public GameObject outputBuilding;
     
     // Add transfer cooldown to prevent too frequent transfers
-    private float transferCooldown = 0.5f;
-    private float lastTransferTime = 0f;
+    private const float TransferCooldown = 0.5f;
+    private float _lastTransferTime = 0f;
     
     // Flag to track if we're currently holding an item
-    private bool isHoldingItem = false;
-    private ConveyorItem heldItem = null;
+    private bool _isHoldingItem = false;
+    private ConveyorItem _heldItem = null;
     
     // Emission properties for glowing effect
-    private float emissionIntensity = 1.0f;
-    private float pulseSpeed = 2.0f;
-    private float maxEmission = 2.0f;
-    
+    private float _emissionIntensity = 1.0f;
+    private const float PulseSpeed = 2.0f;
+    private const float MaxEmission = 2.0f;
+
     private void Start()
     {
         // Set initial material
@@ -73,30 +73,30 @@ public class ConveyorConnector : MonoBehaviour
         if (inputBuilding != null)
         {
             // Pulse the emission when waiting for an item
-            emissionIntensity = 1.0f + Mathf.PingPong(Time.time * pulseSpeed, maxEmission - 1.0f);
+            _emissionIntensity = 1.0f + Mathf.PingPong(Time.time * PulseSpeed, MaxEmission - 1.0f);
             
-            if (!isHoldingItem && waitingForItemMaterial != null)
+            if (!_isHoldingItem && waitingForItemMaterial != null)
             {
                 Color baseColor = new Color(0.5f, 0.5f, 1.0f); 
-                waitingForItemMaterial.SetColor("_EmissionColor", baseColor * emissionIntensity);
+                waitingForItemMaterial.SetColor("_EmissionColor", baseColor * _emissionIntensity);
             }
-            else if (isHoldingItem && hasItemMaterial != null)
+            else if (_isHoldingItem && hasItemMaterial != null)
             {
                 Color baseColor = new Color(1.0f, 0.5f, 0.0f) ; 
-                hasItemMaterial.SetColor("_EmissionColor", baseColor * emissionIntensity);
+                hasItemMaterial.SetColor("_EmissionColor", baseColor * _emissionIntensity);
             }
             
         }
         
         // Only attempt transfers if cooldown has elapsed
-        if (Time.time - lastTransferTime < transferCooldown)
+        if (Time.time - _lastTransferTime < TransferCooldown)
             return;
 
         if (outputBuilding != null)
         {
             if (TryTransferFromBuildingToBelt())
             {
-                lastTransferTime = Time.time;
+                _lastTransferTime = Time.time;
             }
         }
         // Handle item transfer logic based on connection type
@@ -105,7 +105,7 @@ public class ConveyorConnector : MonoBehaviour
             // Input connector: Building -> Belt
             if (TryTransferFromBuildingToBelt())
             {
-                lastTransferTime = Time.time;
+                _lastTransferTime = Time.time;
             }
         }
         else if (!inputBuilding && connectedBuilding != null)
@@ -113,7 +113,7 @@ public class ConveyorConnector : MonoBehaviour
             // Output connector: Belt -> Building
             if (TryTransferFromBeltToBuilding())
             {
-                lastTransferTime = Time.time;
+                _lastTransferTime = Time.time;
             }
         }
     }
@@ -143,7 +143,7 @@ public class ConveyorConnector : MonoBehaviour
             // Change material based on connection status
             if (inputBuilding)
             {
-                if (isHoldingItem)
+                if (_isHoldingItem)
                 {
                     // Show orange glow when holding an item
                     inputConnectorRenderer.material = hasItemMaterial;
@@ -167,7 +167,7 @@ public class ConveyorConnector : MonoBehaviour
             // Change material based on connection status
             if (!isInput && connectedConveyor != null && connectedBuilding != null)
             {
-                if (isHoldingItem)
+                if (_isHoldingItem)
                 {
                     // Show orange glow when holding an item
                     outConnectorRenderer.material = hasItemMaterial;
@@ -190,16 +190,16 @@ public class ConveyorConnector : MonoBehaviour
     private bool TryTransferFromBuildingToBelt()
     {
         // If we're already holding an item, try to place it on the conveyor
-        if (isHoldingItem && heldItem != null)
+        if (_isHoldingItem && _heldItem != null)
         {
        
-        bool accepted = connectedConveyor.AcceptItem(heldItem, true);
+        bool accepted = connectedConveyor.AcceptItem(_heldItem, true);
   
             if (accepted)
             {
                 // Item successfully placed on conveyor
-                isHoldingItem = false;
-                heldItem = null;
+                _isHoldingItem = false;
+                _heldItem = null;
                 UpdateConnectionVisuals(); 
                 return true;
             }
@@ -222,8 +222,8 @@ public class ConveyorConnector : MonoBehaviour
                 else
                 {
                     // If conveyor is full, hold the item temporarily
-                    isHoldingItem = true;
-                    heldItem = item;
+                    _isHoldingItem = true;
+                    _heldItem = item;
                     UpdateConnectionVisuals(); // Update visuals to show we're holding an item
                     return true; // We did get an item, even if we couldn't place it yet
                 }
@@ -244,8 +244,8 @@ public class ConveyorConnector : MonoBehaviour
                 else
                 {
                     // If conveyor is full, hold the item temporarily
-                    isHoldingItem = true;
-                    heldItem = item;
+                    _isHoldingItem = true;
+                    _heldItem = item;
                     UpdateConnectionVisuals(); // Update visuals to show we're holding an item
                     return true; // We did get an item, even if we couldn't place it yet
                 }
@@ -258,21 +258,21 @@ public class ConveyorConnector : MonoBehaviour
     private bool TryTransferFromBeltToBuilding()
     {
         // If we're holding an item, try to deliver it to the building
-        if (isHoldingItem && heldItem != null)
+        if (_isHoldingItem && _heldItem != null)
         {
             bool delivered = false;
             
             if (connectedBuilding is StorageBox storage)
             {
-                delivered = storage.AcceptItem(heldItem);
+                delivered = storage.AcceptItem(_heldItem);
             }
             // Add other building types as needed
             
             if (delivered)
             {
                 // Item successfully delivered to building
-                isHoldingItem = false;
-                heldItem = null;
+                _isHoldingItem = false;
+                _heldItem = null;
                 UpdateConnectionVisuals(); // Update visuals to show we're no longer holding an item
                 return true;
             }
@@ -290,7 +290,7 @@ public class ConveyorConnector : MonoBehaviour
         if (!isInput)
         {
             // If we're already holding an item, reject new ones
-            if (isHoldingItem)
+            if (_isHoldingItem)
                 return false;
                 
             if (connectedBuilding != null)
@@ -311,8 +311,8 @@ public class ConveyorConnector : MonoBehaviour
                 else
                 {
                     // If building can't accept it now, hold the item temporarily
-                    isHoldingItem = true;
-                    heldItem = item;
+                    _isHoldingItem = true;
+                    _heldItem = item;
                     UpdateConnectionVisuals(); // Update visuals to show we're holding an item
                     return true; // We did accept the item, even if we couldn't deliver it yet
                 }

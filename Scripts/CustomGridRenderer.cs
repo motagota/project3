@@ -7,7 +7,7 @@ using System.Collections.Generic;
 [RequireComponent(typeof(GridComputeManager))]
 public class CustomGridRenderer : MonoBehaviour
 {
-    private GridComputeManager gridManager;
+    private GridComputeManager _gridManager;
     
     // Materials for different ground types
     public Material waterMaterial;
@@ -22,19 +22,15 @@ public class CustomGridRenderer : MonoBehaviour
     public Material stoneMaterial;
 
     // Store instantiated tiles for updates
-    private Dictionary<Vector2Int, GridTile> gridTiles = new Dictionary<Vector2Int, GridTile>();
+    private Dictionary<Vector2Int, GridTile> _gridTiles = new Dictionary<Vector2Int, GridTile>();
     
     // Chunking parameters
     [Header("Chunking Settings")]
     public int chunkSize = 10; // Set to 10 to have a single chunk for a 10x10 grid
     public float visibleChunkDistance = 1f; // Reduced since we have fewer chunks
-    private Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
-    private Vector2Int currentCenterChunk = new Vector2Int(0, 0);
+    private Dictionary<Vector2Int, GameObject> _chunks = new Dictionary<Vector2Int, GameObject>();
+    private Vector2Int _currentCenterChunk = new Vector2Int(0, 0);
     
-    // Grid properties (moved from GridManager)
-    [Header("Grid Properties")]
-    public int gridWidth = 10;
-    public int gridHeight = 10;
     
     // Debug options
     [Header("Debug Options")]
@@ -44,11 +40,9 @@ public class CustomGridRenderer : MonoBehaviour
   
     public GameObject tileInteractionPrefab;
 
-    private TopDownCameraController cameraController;
+    private TopDownCameraController _cameraController;
 
-    /// <summary>
-    /// Initializes grid rendering and camera setup
-    /// </summary>
+    
     private void Start()
     {
         if (!ValidateMaterials())
@@ -57,18 +51,18 @@ public class CustomGridRenderer : MonoBehaviour
             return;
         }
         
-        gridManager = GetComponent<GridComputeManager>();
+        _gridManager = GetComponent<GridComputeManager>();
         
-        if (gridManager == null)
+        if (_gridManager == null)
         {
             Debug.LogError("GridComputeManager not found!");
             return;
         }
        
-        cameraController = FindAnyObjectByType<TopDownCameraController>();
-        if (cameraController != null)
+        _cameraController = FindAnyObjectByType<TopDownCameraController>();
+        if (_cameraController != null)
         {
-            cameraController.gridCenter = transform;
+            _cameraController.gridCenter = transform;
         }
 
         // Initial grid rendering with chunks
@@ -77,9 +71,9 @@ public class CustomGridRenderer : MonoBehaviour
 
     private void Update()
     {
-        if (cameraController != null)
+        if (_cameraController != null)
         {         
-            UpdateVisibleChunks(cameraController.transform.position);            
+            UpdateVisibleChunks(_cameraController.transform.position);            
             HandleMouseHover();
         }
     }
@@ -101,15 +95,15 @@ public class CustomGridRenderer : MonoBehaviour
             int gridY = gridCoords.y;
             
             // Check if we're within grid bounds
-            int gridWidth = gridManager.GetGridWidth();
-            int gridHeight = gridManager.GetGridHeight();
+            int gridWidth = _gridManager.GetGridWidth();
+            int gridHeight = _gridManager.GetGridHeight();
             
             if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
             {
                 Vector2Int cellCoords = new Vector2Int(gridX, gridY);
                 
                 // Get the cell data
-                if (gridTiles.TryGetValue(cellCoords, out GridTile tile))
+                if (_gridTiles.TryGetValue(cellCoords, out GridTile tile))
                 {
                     // Show tooltip at mouse position
                     GridComputeManager.GridCell cell = tile.GetCellData();
@@ -165,10 +159,10 @@ public class CustomGridRenderer : MonoBehaviour
         ClearGrid();
 
         GridComputeManager.GridCell[] gridData;
-        gridManager.GetGridData(out gridData); // Get the latest grid data
+        _gridManager.GetGridData(out gridData); // Get the latest grid data
 
-        int gridWidth = gridManager.GetGridWidth();
-        int gridHeight = gridManager.GetGridHeight();
+        int gridWidth = _gridManager.GetGridWidth();
+        int gridHeight = _gridManager.GetGridHeight();
 
         if (debugMode)
         {
@@ -181,7 +175,7 @@ public class CustomGridRenderer : MonoBehaviour
         
         // Create chunks around the center
         Vector2Int centerChunk = new Vector2Int(chunksX / 2, chunksY / 2);
-        currentCenterChunk = centerChunk;
+        _currentCenterChunk = centerChunk;
         
         int chunkRadius = Mathf.CeilToInt(visibleChunkDistance);
         for (int cy = centerChunk.y - chunkRadius; cy <= centerChunk.y + chunkRadius; cy++)
@@ -197,7 +191,7 @@ public class CustomGridRenderer : MonoBehaviour
         
         if (debugMode)
         {
-            Debug.Log($"Grid rendering complete. Chunks created: {chunks.Count}");
+            Debug.Log($"Grid rendering complete. Chunks created: {_chunks.Count}");
         }
     }
     
@@ -234,7 +228,7 @@ public class CustomGridRenderer : MonoBehaviour
         CreateChunkInteractionObjects(chunkObject.transform, startX, startY, endX, endY, gridData, gridWidth);
         
         // Store the chunk
-        chunks[chunkCoord] = chunkObject;
+        _chunks[chunkCoord] = chunkObject;
     }
     
     private void CreateChunkMesh(MeshFilter meshFilter, int startX, int startY, int endX, int endY, 
@@ -392,7 +386,7 @@ public class CustomGridRenderer : MonoBehaviour
                 Material resourceMaterial = cell.resourceType > 0 ? GetResourceMaterial(cell.resourceType) : null;
                 Material groundMaterial = GetGroundMaterial(cell.groundType); // Get appropriate ground material
                 gridTile.Initialize(x, y, cell, groundMaterial, resourceMaterial);
-                gridTiles[cellCoords] = gridTile;
+                _gridTiles[cellCoords] = gridTile;
                                 
             }
         }
@@ -401,26 +395,26 @@ public class CustomGridRenderer : MonoBehaviour
     // Helper to destroy all instantiated tiles and chunks
     private void ClearGrid()
     {
-        foreach (var tile in gridTiles.Values)
+        foreach (var tile in _gridTiles.Values)
         {
             if (tile != null && tile.gameObject != null)
                 Destroy(tile.gameObject);
         }
-        gridTiles.Clear();
+        _gridTiles.Clear();
         
-        foreach (var chunk in chunks.Values)
+        foreach (var chunk in _chunks.Values)
         {
             if (chunk != null)
                 Destroy(chunk);
         }
-        chunks.Clear();
+        _chunks.Clear();
     }
     
     // Updates chunks based on a new center position (e.g., camera or player position)
     public void UpdateVisibleChunks(Vector3 centerPosition)
     {
-        int gridWidth = gridManager.GetGridWidth();
-        int gridHeight = gridManager.GetGridHeight();
+        int gridWidth = _gridManager.GetGridWidth();
+        int gridHeight = _gridManager.GetGridHeight();
         
         // Calculate how many chunks we need
         int chunksX = Mathf.CeilToInt((float)gridWidth / chunkSize);
@@ -436,10 +430,10 @@ public class CustomGridRenderer : MonoBehaviour
         );
         
         // If we haven't moved to a new chunk, do nothing
-        if (centerChunk == currentCenterChunk)
+        if (centerChunk == _currentCenterChunk)
             return;
             
-        currentCenterChunk = centerChunk;
+        _currentCenterChunk = centerChunk;
         
         // Get the grid data if we need to create new chunks
         GridComputeManager.GridCell[] gridData = null;
@@ -461,13 +455,13 @@ public class CustomGridRenderer : MonoBehaviour
                 chunksToKeep.Add(chunkCoord);
                 
                 // Create chunk if it doesn't exist
-                if (!chunks.ContainsKey(chunkCoord))
+                if (!_chunks.ContainsKey(chunkCoord))
                 {
                     // Lazy load grid data only when needed
                     if (gridData == null)
                     {
                         gridData = new GridComputeManager.GridCell[gridWidth * gridHeight];
-                        gridManager.GetGridData(out gridData);
+                        _gridManager.GetGridData(out gridData);
                     }
                     
                     CreateChunk(chunkCoord, gridData, gridWidth, gridHeight);
@@ -477,7 +471,7 @@ public class CustomGridRenderer : MonoBehaviour
         
         // Remove chunks that are too far away
         List<Vector2Int> chunksToRemove = new List<Vector2Int>();
-        foreach (var chunkCoord in chunks.Keys)
+        foreach (var chunkCoord in _chunks.Keys)
         {
             if (!chunksToKeep.Contains(chunkCoord))
             {
@@ -497,13 +491,13 @@ public class CustomGridRenderer : MonoBehaviour
             {
                 for (int x = startX; x < endX; x++)
                 {
-                    gridTiles.Remove(new Vector2Int(x, y));
+                    _gridTiles.Remove(new Vector2Int(x, y));
                 }
             }
             
             // Destroy the chunk GameObject
-            Destroy(chunks[chunkCoord]);
-            chunks.Remove(chunkCoord);
+            Destroy(_chunks[chunkCoord]);
+            _chunks.Remove(chunkCoord);
         }
     }
 
@@ -572,12 +566,12 @@ public class CustomGridRenderer : MonoBehaviour
         Vector2Int cellCoords = new Vector2Int(x, y);
         
         // Check if we have this tile
-        if (gridTiles.TryGetValue(cellCoords, out GridTile tile))
+        if (_gridTiles.TryGetValue(cellCoords, out GridTile tile))
         {
             // Get updated cell data
-            int index = y * gridManager.GetGridWidth() + x;
+            int index = y * _gridManager.GetGridWidth() + x;
             GridComputeManager.GridCell[] gridData = new GridComputeManager.GridCell[1];
-            gridManager.GetGridData(out gridData); // This should be optimized to get just one cell
+            _gridManager.GetGridData(out gridData); // This should be optimized to get just one cell
             
             // Update only the resource on the tile
             Material resourceMaterial = gridData[index].resourceType > 0 ? 
@@ -590,8 +584,8 @@ public class CustomGridRenderer : MonoBehaviour
     // Helper method to convert world position to grid coordinates
     public Vector2Int WorldToGridCoordinates(Vector3 worldPosition)
     {
-        int gridWidth = gridManager.GetGridWidth();
-        int gridHeight = gridManager.GetGridHeight();
+        int gridWidth = _gridManager.GetGridWidth();
+        int gridHeight = _gridManager.GetGridHeight();
         
         // Calculate grid coordinates based on world position
         float normalizedX = (worldPosition.x / (tileScale + tileSpacing)) + (gridWidth / 2f);
@@ -626,8 +620,8 @@ public class CustomGridRenderer : MonoBehaviour
     // And the reverse conversion
     private Vector3 GridToWorldCoordinates(int gridX, int gridY)
     {
-        int gridWidth = gridManager.GetGridWidth();
-        int gridHeight = gridManager.GetGridHeight();
+        int gridWidth = _gridManager.GetGridWidth();
+        int gridHeight = _gridManager.GetGridHeight();
         
         float worldX = (gridX - gridWidth / 2f) * (tileScale + tileSpacing);
         float worldZ = (gridY - gridHeight / 2f) * (tileScale + tileSpacing);

@@ -11,7 +11,7 @@ public class PlayerInventory : MonoBehaviour
     public float maxStackSize = 100f;
     
     // Dictionary to store resources: Key = resource type, Value = amount
-    private Dictionary<int, float> inventory = new Dictionary<int, float>();
+    private Dictionary<int, float> _inventory = new Dictionary<int, float>();
     
     private void Awake()
     {
@@ -34,20 +34,20 @@ public class PlayerInventory : MonoBehaviour
             return false;
             
         // Check if we have space
-        if (GetUsedSlots() >= maxInventorySlots && !inventory.ContainsKey(resourceType))
+        if (GetUsedSlots() >= maxInventorySlots && !_inventory.ContainsKey(resourceType))
             return false;
             
         // Check if we're exceeding stack size
-        if (inventory.ContainsKey(resourceType))
+        if (_inventory.ContainsKey(resourceType))
         {
-            if (inventory[resourceType] + amount > maxStackSize)
+            if (_inventory[resourceType] + amount > maxStackSize)
                 return false;
                 
-            inventory[resourceType] += amount;
+            _inventory[resourceType] += amount;
         }
         else
         {
-            inventory[resourceType] = amount;
+            _inventory[resourceType] = amount;
         }
         
         // Notify UI to update
@@ -59,14 +59,14 @@ public class PlayerInventory : MonoBehaviour
     // Remove resources from inventory
     public bool RemoveResource(int resourceType, float amount)
     {
-        if (!inventory.ContainsKey(resourceType) || inventory[resourceType] < amount)
+        if (!_inventory.ContainsKey(resourceType) || _inventory[resourceType] < amount)
             return false;
             
-        inventory[resourceType] -= amount;
+        _inventory[resourceType] -= amount;
         
         // Remove entry if amount is zero
-        if (inventory[resourceType] <= 0)
-            inventory.Remove(resourceType);
+        if (_inventory[resourceType] <= 0)
+            _inventory.Remove(resourceType);
             
         // Notify UI to update
         OnInventoryChanged?.Invoke();
@@ -78,7 +78,7 @@ public class PlayerInventory : MonoBehaviour
     public int GetUsedSlots()
     {
         int count = 0;
-        foreach (var resource in inventory)
+        foreach (var resource in _inventory)
         {
             if (resource.Value > 0)
                 count++;
@@ -89,14 +89,14 @@ public class PlayerInventory : MonoBehaviour
     // Get all inventory items
     public Dictionary<int, float> GetInventory()
     {
-        return new Dictionary<int, float>(inventory);
+        return new Dictionary<int, float>(_inventory);
     }
     
     public Dictionary<int, int> GetSerializableInventory()
     {
         Dictionary<int, int> result = new Dictionary<int, int>();
         
-        foreach (var kvp in inventory)
+        foreach (var kvp in _inventory)
         {
             result[kvp.Key] = (int)kvp.Value;
         }
@@ -106,11 +106,11 @@ public class PlayerInventory : MonoBehaviour
     
     public void LoadInventory(Dictionary<int, int> savedInventory)
     {
-        inventory.Clear();
+        _inventory.Clear();
         
         foreach (var kvp in savedInventory)
         {
-            inventory[kvp.Key] = kvp.Value;
+            _inventory[kvp.Key] = kvp.Value;
         }
         
         // Notify UI to update

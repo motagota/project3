@@ -21,25 +21,25 @@ public class ConveyorBelt : MonoBehaviour
     public int direction = 0;
     
     // Items currently on this conveyor
-    private List<ConveyorItem> itemsOnFarLane = new List<ConveyorItem>();
-    private List<ConveyorItem> itemsOnCloseLane = new List<ConveyorItem>();
+    private List<ConveyorItem> _itemsOnFarLane = new List<ConveyorItem>();
+    private List<ConveyorItem> _itemsOnCloseLane = new List<ConveyorItem>();
     
     // List of connectors attached to this conveyor
-    private List<ConveyorConnector> connectedConnectors = new List<ConveyorConnector>();
+    private List<ConveyorConnector> _connectedConnectors = new List<ConveyorConnector>();
     // Lists for input and output connectors
-    private List<ConveyorConnector> inputConnectors = new List<ConveyorConnector>();
-    private List<ConveyorConnector> outputConnectors = new List<ConveyorConnector>();
+    private List<ConveyorConnector> _inputConnectors = new List<ConveyorConnector>();
+    private List<ConveyorConnector> _outputConnectors = new List<ConveyorConnector>();
     
     // Connected conveyor belts
-    private List<ConveyorBelt> connectedConveyors = new List<ConveyorBelt>();
+    private List<ConveyorBelt> _connectedConveyors = new List<ConveyorBelt>();
     
     private void Update()
     {
         // Move items on the far lane
-        MoveItemsOnLane(itemsOnFarLane, farLaneTransform, true);
+        MoveItemsOnLane(_itemsOnFarLane, farLaneTransform, true);
         
         // Move items on the close lane
-        MoveItemsOnLane(itemsOnCloseLane, closeLaneTransform, false);
+        MoveItemsOnLane(_itemsOnCloseLane, closeLaneTransform, false);
         
         // Update conveyor material to scroll
         if (conveyorMaterial != null && beltMeshObject != null)
@@ -99,9 +99,9 @@ public class ConveyorBelt : MonoBehaviour
     
     public void RegisterConnector(ConveyorConnector connector)
     {
-        if (!connectedConnectors.Contains(connector))
+        if (!_connectedConnectors.Contains(connector))
         {
-            connectedConnectors.Add(connector);
+            _connectedConnectors.Add(connector);
             UpdateConnectionPoints();
         }
     }
@@ -120,9 +120,9 @@ public class ConveyorBelt : MonoBehaviour
     public void ConnectToConveyor(ConveyorBelt otherConveyor, ConveyorConnectionType connectionType)
     {
         // Add the other conveyor to our connected conveyors list if not already there
-        if (!connectedConveyors.Contains(otherConveyor))
+        if (!_connectedConveyors.Contains(otherConveyor))
         {
-            connectedConveyors.Add(otherConveyor);
+            _connectedConveyors.Add(otherConveyor);
             
             // Create a virtual connection based on the connection type
             switch (connectionType)
@@ -148,7 +148,7 @@ public class ConveyorBelt : MonoBehaviour
             }
             
             // Make sure the other conveyor is also connected to this one (if not already)
-            if (!otherConveyor.connectedConveyors.Contains(this))
+            if (!otherConveyor._connectedConveyors.Contains(this))
             {
                 // Determine the reciprocal connection type
                 ConveyorConnectionType reciprocalType = GetReciprocalConnectionType(connectionType);
@@ -191,18 +191,18 @@ public class ConveyorBelt : MonoBehaviour
     private void UpdateConnectionPoints()
     {
         // Clear existing connections first
-        inputConnectors.Clear();
-        outputConnectors.Clear();
+        _inputConnectors.Clear();
+        _outputConnectors.Clear();
         
         // Add logic to set input/output points based on connector positions
-        foreach (ConveyorConnector connector in connectedConnectors)
+        foreach (ConveyorConnector connector in _connectedConnectors)
         {
             Vector3 relativePos = transform.InverseTransformPoint(connector.transform.position);
             
             if (relativePos.z > 0.5f)
-                outputConnectors.Add(connector);
+                _outputConnectors.Add(connector);
             else if (relativePos.z < -0.5f)
-                inputConnectors.Add(connector);
+                _inputConnectors.Add(connector);
         }
     }
     
@@ -210,10 +210,10 @@ public class ConveyorBelt : MonoBehaviour
     private bool TransferItemToNextConveyor(ConveyorItem item, bool isFarLane)
     {
         // First try to transfer through connectors
-        if (outputConnectors.Count > 0)
+        if (_outputConnectors.Count > 0)
         {
             // For simplicity, just use the first output connector
-            ConveyorConnector outputConnector = outputConnectors[0];
+            ConveyorConnector outputConnector = _outputConnectors[0];
             
             if (outputConnector.connectedConveyor != null)
             {
@@ -228,7 +228,7 @@ public class ConveyorBelt : MonoBehaviour
         }
         
         // If no connectors or transfer failed, try direct conveyor connections
-        foreach (ConveyorBelt connectedBelt in connectedConveyors)
+        foreach (ConveyorBelt connectedBelt in _connectedConveyors)
         {
             // Check if this is an output connection
             Vector3 dirToConnected = (connectedBelt.transform.position - transform.position).normalized;
@@ -254,13 +254,13 @@ public class ConveyorBelt : MonoBehaviour
         if (useFarLane)
         {
             item.transform.position = inputPoint.position;
-            itemsOnFarLane.Add(item);
+            _itemsOnFarLane.Add(item);
             return true;
         }
         else
         {
             item.transform.position = inputPoint.position;
-            itemsOnCloseLane.Add(item);
+            _itemsOnCloseLane.Add(item);
             return true;
         }
     }
