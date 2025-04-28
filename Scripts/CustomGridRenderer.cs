@@ -628,4 +628,10 @@ public class CustomGridRenderer : MonoBehaviour
         
         return new Vector3(worldX, 0, worldZ);
     }
+
+    public GridTile GetTileAt(int i, int i1)
+    {
+        _gridTiles.TryGetValue(new Vector2Int(i, i1), out GridTile tile);
+        return tile;
+    }
 }
