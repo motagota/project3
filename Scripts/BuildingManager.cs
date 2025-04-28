@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -892,6 +893,8 @@ public class BuildingManager : MonoBehaviour
             
             // Move the input object to the new position
             inputObject.position = newPosition;
+
+            connector.inputBuilding = inputConnectedObject;
             Debug.Log($"Positioned input object on connected object at {newPosition}");
         }
         else
@@ -910,6 +913,7 @@ public class BuildingManager : MonoBehaviour
             
             // Move the output object to the new position
             outputObject.position = newPosition;
+            connector.outputBuilding = outputConnectedObject;
             Debug.Log($"Positioned output object on connected object at {newPosition}");
         }
         else
@@ -919,25 +923,7 @@ public class BuildingManager : MonoBehaviour
             Debug.Log("Reset output object to default position");
         }
     }
-
-    private void ConnectToNearbyConveyor(ConveyorConnector connector)
-    {
-        // Find nearby conveyor belts
-        Collider[] nearbyConveyors = Physics.OverlapSphere(connector.transform.position, 1.0f, buildingLayer);
-        
-        foreach (var collider in nearbyConveyors)
-        {
-            ConveyorBelt conveyor = collider.GetComponent<ConveyorBelt>();
-            if (conveyor != null)
-            {
-                connector.ConnectToNearbyConveyor(conveyor);
-                conveyor.RegisterConnector(connector); // New line
-                Debug.Log("Connector attached to conveyor belt");
-                break;
-            }
-        }
-    }
-    
+  
     private void CancelPlacement()
     {
         if (currentGhost != null)

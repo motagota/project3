@@ -20,6 +20,9 @@ public class ConveyorConnector : MonoBehaviour
     // References to connected objects
     [HideInInspector] public ConveyorBelt connectedConveyor;
     [HideInInspector] public MonoBehaviour connectedBuilding; // Generic reference to any building
+
+    public GameObject inputBuilding;
+    public GameObject outputBuilding;
     
     // Add transfer cooldown to prevent too frequent transfers
     private float transferCooldown = 0.5f;
@@ -60,29 +63,44 @@ public class ConveyorConnector : MonoBehaviour
             hasItemMaterial.EnableKeyword("_EMISSION");
             hasItemMaterial.SetColor("_EmissionColor", new Color(1.0f, 0.5f, 0.0f) * 1.5f); // Orange glow
         }
+        
+        inputConnectorRenderer.material = waitingForItemMaterial;
     }
     
     private void Update()
     {
         // Update emission intensity for pulsing effect when waiting for item
-        if (connectedConveyor != null && connectedBuilding != null && !isHoldingItem)
+        if (inputBuilding != null)
         {
             // Pulse the emission when waiting for an item
             emissionIntensity = 1.0f + Mathf.PingPong(Time.time * pulseSpeed, maxEmission - 1.0f);
             
-            if (waitingForItemMaterial != null)
+            if (!isHoldingItem && waitingForItemMaterial != null)
             {
-                Color baseColor = new Color(0.5f, 0.5f, 1.0f); // Base blue color
+                Color baseColor = new Color(0.5f, 0.5f, 1.0f); 
                 waitingForItemMaterial.SetColor("_EmissionColor", baseColor * emissionIntensity);
             }
+            else if (isHoldingItem && hasItemMaterial != null)
+            {
+                Color baseColor = new Color(1.0f, 0.5f, 0.0f) ; 
+                hasItemMaterial.SetColor("_EmissionColor", baseColor * emissionIntensity);
+            }
+            
         }
         
         // Only attempt transfers if cooldown has elapsed
         if (Time.time - lastTransferTime < transferCooldown)
             return;
-            
+
+        if (outputBuilding != null)
+        {
+            if (TryTransferFromBuildingToBelt())
+            {
+                lastTransferTime = Time.time;
+            }
+        }
         // Handle item transfer logic based on connection type
-        if (isInput && connectedConveyor != null && connectedBuilding != null)
+        if (inputBuilding != null && connectedBuilding != null)
         {
             // Input connector: Building -> Belt
             if (TryTransferFromBuildingToBelt())
@@ -90,7 +108,7 @@ public class ConveyorConnector : MonoBehaviour
                 lastTransferTime = Time.time;
             }
         }
-        else if (!isInput && connectedConveyor != null && connectedBuilding != null)
+        else if (!inputBuilding && connectedBuilding != null)
         {
             // Output connector: Belt -> Building
             if (TryTransferFromBeltToBuilding())
@@ -114,11 +132,7 @@ public class ConveyorConnector : MonoBehaviour
         UpdateConnectionVisuals();
     }
     
-    // Connect to a nearby conveyor (used by BuildingManager)
-    public void ConnectToNearbyConveyor(ConveyorBelt conveyor)
-    {
-        ConnectToConveyor(conveyor);
-    }
+  
     
     // Update the visual appearance based on connection status
     private void UpdateConnectionVisuals()
@@ -127,7 +141,7 @@ public class ConveyorConnector : MonoBehaviour
         if (inputConnectorRenderer != null)
         {
             // Change material based on connection status
-            if (isInput && connectedConveyor != null && connectedBuilding != null)
+            if (inputBuilding)
             {
                 if (isHoldingItem)
                 {
@@ -178,20 +192,20 @@ public class ConveyorConnector : MonoBehaviour
         // If we're already holding an item, try to place it on the conveyor
         if (isHoldingItem && heldItem != null)
         {
-            bool accepted = connectedConveyor.AcceptItem(heldItem, true);
+       
+        bool accepted = connectedConveyor.AcceptItem(heldItem, true);
+  
             if (accepted)
             {
                 // Item successfully placed on conveyor
                 isHoldingItem = false;
                 heldItem = null;
-                UpdateConnectionVisuals(); // Update visuals to show we're no longer holding an item
+                UpdateConnectionVisuals(); 
                 return true;
             }
             return false; // Couldn't place on conveyor, will try again next update
         }
-        
-        // Implementation depends on your item system
-        // Example: Check if building has items to output
+
         if (connectedBuilding is MinerBuilding miner)
         {
             // Use GetNextItem instead of TryExtractItem
@@ -199,7 +213,8 @@ public class ConveyorConnector : MonoBehaviour
             if (item != null)
             {
                 // Try to place directly on conveyor first
-                bool accepted = connectedConveyor.AcceptItem(item, true);
+          //      bool accepted = connectedConveyor.AcceptItem(item, true);
+          bool accepted = false;
                 if (accepted)
                 {
                     return true;

@@ -30,6 +30,9 @@ public class ConveyorBelt : MonoBehaviour
     private List<ConveyorConnector> inputConnectors = new List<ConveyorConnector>();
     private List<ConveyorConnector> outputConnectors = new List<ConveyorConnector>();
     
+    // Connected conveyor belts
+    private List<ConveyorBelt> connectedConveyors = new List<ConveyorBelt>();
+    
     private void Update()
     {
         // Move items on the far lane
@@ -103,7 +106,7 @@ public class ConveyorBelt : MonoBehaviour
         }
     }
 
-    // Add the missing ConnectToConveyor method
+    // Connect to a conveyor through a connector
     public void ConnectToConveyor(ConveyorConnector connector)
     {
         // Register the connector with this conveyor
@@ -113,11 +116,76 @@ public class ConveyorBelt : MonoBehaviour
         connector.ConnectToConveyor(this);
     }
     
-    // Add this method to connect to another conveyor belt
+    // Connect directly to another conveyor belt
     public void ConnectToConveyor(ConveyorBelt otherConveyor, ConveyorConnectionType connectionType)
     {
-        // Implementation for connecting to another conveyor belt
-        Debug.Log($"Connected conveyor at {transform.position} to conveyor at {otherConveyor.transform.position} with type {connectionType}");
+        // Add the other conveyor to our connected conveyors list if not already there
+        if (!connectedConveyors.Contains(otherConveyor))
+        {
+            connectedConveyors.Add(otherConveyor);
+            
+            // Create a virtual connection based on the connection type
+            switch (connectionType)
+            {
+                case ConveyorConnectionType.Input:
+                    // This conveyor receives items from the other conveyor
+                    Debug.Log($"Connected conveyor at {transform.position} to receive from conveyor at {otherConveyor.transform.position}");
+                    break;
+                    
+                case ConveyorConnectionType.Output:
+                    // This conveyor sends items to the other conveyor
+                    Debug.Log($"Connected conveyor at {transform.position} to send to conveyor at {otherConveyor.transform.position}");
+                    break;
+                    
+                case ConveyorConnectionType.Bidirectional:
+                    // Items can flow both ways
+                    Debug.Log($"Connected conveyor at {transform.position} bidirectionally with conveyor at {otherConveyor.transform.position}");
+                    break;
+                    
+                default:
+                    Debug.Log($"Connected conveyor at {transform.position} to conveyor at {otherConveyor.transform.position} with type {connectionType}");
+                    break;
+            }
+            
+            // Make sure the other conveyor is also connected to this one (if not already)
+            if (!otherConveyor.connectedConveyors.Contains(this))
+            {
+                // Determine the reciprocal connection type
+                ConveyorConnectionType reciprocalType = GetReciprocalConnectionType(connectionType);
+                otherConveyor.ConnectToConveyor(this, reciprocalType);
+            }
+        }
+    }
+    
+    // Helper method to get the reciprocal connection type
+    private ConveyorConnectionType GetReciprocalConnectionType(ConveyorConnectionType type)
+    {
+        switch (type)
+        {
+            case ConveyorConnectionType.Input:
+                return ConveyorConnectionType.Output;
+                
+            case ConveyorConnectionType.Output:
+                return ConveyorConnectionType.Input;
+                
+            case ConveyorConnectionType.Bidirectional:
+                return ConveyorConnectionType.Bidirectional;
+                
+            case ConveyorConnectionType.Next:
+                return ConveyorConnectionType.Previous;
+                
+            case ConveyorConnectionType.Previous:
+                return ConveyorConnectionType.Next;
+                
+            case ConveyorConnectionType.LeftSide:
+                return ConveyorConnectionType.RightSide;
+                
+            case ConveyorConnectionType.RightSide:
+                return ConveyorConnectionType.LeftSide;
+                
+            default:
+                return type;
+        }
     }
 
     private void UpdateConnectionPoints()
@@ -141,11 +209,10 @@ public class ConveyorBelt : MonoBehaviour
     // Add a method to handle transferring items to the next conveyor through connectors
     private bool TransferItemToNextConveyor(ConveyorItem item, bool isFarLane)
     {
-        // Check if we have any output connectors
+        // First try to transfer through connectors
         if (outputConnectors.Count > 0)
         {
             // For simplicity, just use the first output connector
-            // You could implement more complex logic to choose which connector to use
             ConveyorConnector outputConnector = outputConnectors[0];
             
             if (outputConnector.connectedConveyor != null)
@@ -156,8 +223,25 @@ public class ConveyorBelt : MonoBehaviour
             else if (outputConnector.connectedBuilding != null)
             {
                 // Handle transfer to a building
-                // This would need to be implemented based on your building interface
                 return false;
+            }
+        }
+        
+        // If no connectors or transfer failed, try direct conveyor connections
+        foreach (ConveyorBelt connectedBelt in connectedConveyors)
+        {
+            // Check if this is an output connection
+            Vector3 dirToConnected = (connectedBelt.transform.position - transform.position).normalized;
+            Vector3 forwardDir = transform.forward;
+            
+            // If the connected belt is roughly in front of this one (output direction)
+            if (Vector3.Dot(dirToConnected, forwardDir) > 0.5f)
+            {
+                // Try to transfer the item
+                if (connectedBelt.AcceptItem(item, isFarLane))
+                {
+                    return true;
+                }
             }
         }
         
