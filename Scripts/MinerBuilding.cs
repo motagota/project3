@@ -292,4 +292,27 @@ public class MinerBuilding : MonoBehaviour
     {
         partialResources = amount;
     }
+    
+    // Add method for ConveyorConnector to get items
+    public ConveyorItem GetNextItem()
+    {
+        if (StoredResources <= 0)
+            return null;
+            
+        StoredResources--;
+        
+        // Create a new item of the appropriate resource type
+        Vector3 spawnPosition = transform.position + transform.forward * 0.5f;
+        return ConveyorItem.CreateItem(ResourceType, 1, spawnPosition);
+    }
+    
+    // Add method for ConveyorConnector to return items if conveyor is full
+    public void StoreItem(ConveyorItem item)
+    {
+        if (item != null && item.itemType == ResourceType)
+        {
+            StoredResources += item.quantity;
+            Destroy(item.gameObject);
+        }
+    }
 }

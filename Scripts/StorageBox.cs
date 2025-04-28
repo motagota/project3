@@ -132,4 +132,60 @@ public class StorageBox : MonoBehaviour
             storedResources[kvp.Key] = kvp.Value;
         }
     }
+    
+    // Get an item from storage for conveyor belt transfer
+    public ConveyorItem GetItem()
+    {
+        // Find the first resource type with a non-zero amount
+        foreach (var resource in storedResources)
+        {
+            if (resource.Value > 0)
+            {
+                // Create a new conveyor item with this resource type
+                int resourceType = resource.Key;
+                int amount = 1; // Transfer one unit at a time
+                
+                // Remove the resource from storage
+                RemoveResource(resourceType, amount);
+                
+                // Create and return a new conveyor item
+                Vector3 spawnPosition = transform.position + Vector3.up * 0.5f;
+                return ConveyorItem.CreateItem(resourceType, amount, spawnPosition);
+            }
+        }
+        
+        // No resources available
+        return null;
+    }
+    
+    // Store an item returned from a conveyor belt
+    public void StoreItem(ConveyorItem item)
+    {
+        if (item != null)
+        {
+            // Add the item's resources to storage
+            AddResource(item.itemType, item.quantity);
+            
+            // Destroy the conveyor item game object
+            Destroy(item.gameObject);
+        }
+    }
+    
+    // Accept an item from a conveyor belt
+    public bool AcceptItem(ConveyorItem item)
+    {
+        if (item == null)
+            return false;
+            
+        // Try to add the resource to storage
+        bool accepted = AddResource(item.itemType, item.quantity);
+        
+        if (accepted)
+        {
+            // If accepted, destroy the conveyor item
+            Destroy(item.gameObject);
+        }
+        
+        return accepted;
+    }
 }

@@ -401,6 +401,7 @@ GameObject:
   m_Component:
   - component: {fileID: 302893954}
   - component: {fileID: 302893953}
+  - component: {fileID: 302893955}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -423,12 +424,16 @@ MonoBehaviour:
   minerPrefab: {fileID: 2844866772905838915, guid: e8644b528d9b9d74785a29602cb59007, type: 3}
   storageBoxPrefab: {fileID: 5999429954220690722, guid: 1ffb30efb84085c49abc676d06a8e53b, type: 3}
   conveyorBeltPrefab: {fileID: 4489127792548477567, guid: b40edbfb9c77b71409befb4b4ffb77b0, type: 3}
-  conveyorConnectorPrefab: {fileID: 2367600222880708315, guid: 0be558610d1022341b1b358171ec4dfc, type: 3}
+  conveyorConnectorPrefab: {fileID: 8833482610376921522, guid: 45444daabacbf1c4f9bae6bbaea13641, type: 3}
+  inputConnectorPrefab: {fileID: 0}
+  outputConnectorPrefab: {fileID: 0}
   toolbar: {fileID: 367839431}
   minerButton: {fileID: 775321691}
   storageBoxButton: {fileID: 1250421105}
   conveyorBeltButton: {fileID: 1890662465}
   connectorButton: {fileID: 2119043352}
+  inputConnectorButton: {fileID: 0}
+  outputConnectorButton: {fileID: 0}
   ghostMaterial: {fileID: 2100000, guid: 3cbccf3adb2618342b08a8df67787536, type: 2}
   validPlacementColor: {r: 0, g: 1, b: 0, a: 0.5}
   invalidPlacementColor: {r: 1, g: 0, b: 0, a: 0.5}
@@ -454,6 +459,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &302893955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 302893952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10f471232f0f64a4894ebef1af38608f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemType: 0
+  quantity: 1
+  itemModel: {fileID: 7671053401003432854, guid: b3715f31c8ce60e479f87365c220de38, type: 3}
+  rotateOnBelt: 0
+  rotationSpeed: 30
 --- !u!1 &309548660
 GameObject:
   m_ObjectHideFlags: 0

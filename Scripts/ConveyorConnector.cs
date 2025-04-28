@@ -4,154 +4,305 @@ public class ConveyorConnector : MonoBehaviour
 {
     [Header("Connection Settings")]
     public Transform connectionPoint;
-    public ConveyorConnectionType connectionType = ConveyorConnectionType.Input; // Replace boolean with enum
+    public bool isInput = true; // True = input (building to belt), False = output (belt to building)
     
-    [Header("Connected Objects")]
-    public ConveyorBelt connectedConveyor;
-    public MonoBehaviour connectedBuilding; // MinerBuilding, StorageBox, etc.
+    [Header("Visual Feedback")]
+    public Renderer inputConnectorRenderer; // Reference to the renderer component
+    public Renderer outConnectorRenderer; // Reference to the renderer component
     
-    [Header("Visual")]
-    public GameObject connectorModel;
-    public Material connectorMaterial;
+    public Material inputNotConnectedMaterial; // Material when not connected
+    public Material outputNotConnectedMaterial; // Material when not connected
     
-    // Track which lane is being used
-    private bool usingFarLane = true;
-    private bool isInput;
-
+    public Material connectedMaterial; // Material when connected
+    public Material waitingForItemMaterial; // Material when connected and waiting for item
+    public Material hasItemMaterial; // Material when holding an item (orange glow)
+    
+    // References to connected objects
+    [HideInInspector] public ConveyorBelt connectedConveyor;
+    [HideInInspector] public MonoBehaviour connectedBuilding; // Generic reference to any building
+    
+    // Add transfer cooldown to prevent too frequent transfers
+    private float transferCooldown = 0.5f;
+    private float lastTransferTime = 0f;
+    
+    // Flag to track if we're currently holding an item
+    private bool isHoldingItem = false;
+    private ConveyorItem heldItem = null;
+    
+    // Emission properties for glowing effect
+    private float emissionIntensity = 1.0f;
+    private float pulseSpeed = 2.0f;
+    private float maxEmission = 2.0f;
+    
     private void Start()
     {
-        // Initialize connector visuals
-        if (connectorModel == null)
+        // Set initial material
+        if (inputConnectorRenderer != null && inputNotConnectedMaterial != null)
         {
-            CreateDefaultConnectorVisual();
+            inputConnectorRenderer.material = inputNotConnectedMaterial;
+        }
+        if (outConnectorRenderer != null && outputNotConnectedMaterial != null)
+        {
+            outConnectorRenderer.material = outputNotConnectedMaterial;
+        }
+        
+        // Create the materials if they don't exist
+        if (waitingForItemMaterial == null)
+        {
+            waitingForItemMaterial = new Material(connectedMaterial);
+            waitingForItemMaterial.EnableKeyword("_EMISSION");
+            waitingForItemMaterial.SetColor("_EmissionColor", new Color(0.5f, 0.5f, 1.0f) * 1.5f);
+        }
+        
+        if (hasItemMaterial == null)
+        {
+            hasItemMaterial = new Material(connectedMaterial);
+            hasItemMaterial.EnableKeyword("_EMISSION");
+            hasItemMaterial.SetColor("_EmissionColor", new Color(1.0f, 0.5f, 0.0f) * 1.5f); // Orange glow
         }
     }
     
     private void Update()
     {
-        if (connectionType == ConveyorConnectionType.Input && connectedConveyor != null && connectedBuilding != null)
+        // Update emission intensity for pulsing effect when waiting for item
+        if (connectedConveyor != null && connectedBuilding != null && !isHoldingItem)
         {
-            // Handle input logic (building to conveyor)
-            HandleInputLogic();
-        }
-        else if (connectionType == ConveyorConnectionType.Output && connectedConveyor != null && connectedBuilding != null)
-        {
-            // Handle output logic (conveyor to building)
-            HandleOutputLogic();
-        }
-        else if (connectionType == ConveyorConnectionType.Bidirectional && connectedConveyor != null && connectedBuilding != null)
-        {
-            // Handle bidirectional logic if needed
-            HandleInputLogic();
-            HandleOutputLogic();
-        }
-    }
-    
-    private void HandleInputLogic()
-    {
-        // Example: If this is connected to a miner, take resources and put them on the conveyor
-        if (connectedBuilding is MinerBuilding miner)
-        {
-            // Check if miner has resources and conveyor can accept them
-            if (miner.StoredResources > 0)
+            // Pulse the emission when waiting for an item
+            emissionIntensity = 1.0f + Mathf.PingPong(Time.time * pulseSpeed, maxEmission - 1.0f);
+            
+            if (waitingForItemMaterial != null)
             {
-                // Try to place on far lane first
-                if (usingFarLane)
-                {
-                    // Create a new item from the miner's resources
-                    ConveyorItem newItem = ConveyorItem.CreateItem(miner.ResourceType, 1, connectionPoint.position);
-                    
-                    // Try to place on far lane
-                    if (connectedConveyor.AcceptItem(newItem, true))
-                    {
-                        // Successfully placed on far lane
-                        miner.StoredResources--;
-                    }
-                    else
-                    {
-                        // Far lane is blocked, try close lane next time
-                        usingFarLane = false;
-                        Destroy(newItem.gameObject); // Clean up the item we couldn't place
-                    }
-                }
-                else
-                {
-                    // Try close lane
-                    ConveyorItem newItem = ConveyorItem.CreateItem(miner.ResourceType, 1, connectionPoint.position);
-                    
-                    if (connectedConveyor.AcceptItem(newItem, false))
-                    {
-                        // Successfully placed on close lane
-                        miner.StoredResources--;
-                        usingFarLane = true; // Reset to try far lane next time
-                    }
-                    else
-                    {
-                        // Both lanes are blocked
-                        Destroy(newItem.gameObject); // Clean up the item we couldn't place
-                    }
-                }
+                Color baseColor = new Color(0.5f, 0.5f, 1.0f); // Base blue color
+                waitingForItemMaterial.SetColor("_EmissionColor", baseColor * emissionIntensity);
+            }
+        }
+        
+        // Only attempt transfers if cooldown has elapsed
+        if (Time.time - lastTransferTime < transferCooldown)
+            return;
+            
+        // Handle item transfer logic based on connection type
+        if (isInput && connectedConveyor != null && connectedBuilding != null)
+        {
+            // Input connector: Building -> Belt
+            if (TryTransferFromBuildingToBelt())
+            {
+                lastTransferTime = Time.time;
+            }
+        }
+        else if (!isInput && connectedConveyor != null && connectedBuilding != null)
+        {
+            // Output connector: Belt -> Building
+            if (TryTransferFromBeltToBuilding())
+            {
+                lastTransferTime = Time.time;
             }
         }
     }
     
-    private void HandleOutputLogic()
-    {
-        // Example: If this is connected to a storage box, take items from conveyor and put in storage
-        if (connectedBuilding is StorageBox storage)
-        {
-            // Logic for taking items from conveyor and putting them in storage
-            // This would be implemented based on how your StorageBox handles receiving items
-        }
-    }
-    
+    // Connect to a conveyor belt
     public void ConnectToConveyor(ConveyorBelt conveyor)
     {
         connectedConveyor = conveyor;
-        
-        // Update visual to show connection
-        if (connectorModel != null)
-        {
-            // Point connector toward conveyor
-            Vector3 direction = conveyor.transform.position - transform.position;
-            transform.rotation = Quaternion.LookRotation(direction);
-        }
+        UpdateConnectionVisuals();
     }
     
-    // Change this method to accept a ConveyorBelt parameter
-    public void ConnectToNearbyConveyor(ConveyorBelt conveyor)
-    {
-        // Simply call the existing ConnectToConveyor method
-        ConnectToConveyor(conveyor);
-    }
-    
+    // Connect to a building (miner, storage, etc.)
     public void ConnectToBuilding(MonoBehaviour building)
     {
         connectedBuilding = building;
+        UpdateConnectionVisuals();
     }
     
-    private void CreateDefaultConnectorVisual()
+    // Connect to a nearby conveyor (used by BuildingManager)
+    public void ConnectToNearbyConveyor(ConveyorBelt conveyor)
     {
-        // Create a simple visual representation
-        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        visual.transform.SetParent(transform);
-        visual.transform.localPosition = Vector3.zero;
-        visual.transform.localScale = new Vector3(0.2f, 0.1f, 0.2f);
-        visual.transform.localRotation = Quaternion.Euler(90, 0, 0);
-        
-        // Set material
-        Renderer renderer = visual.GetComponent<Renderer>();
-        if (renderer != null && connectorMaterial != null)
+        ConnectToConveyor(conveyor);
+    }
+    
+    // Update the visual appearance based on connection status
+    private void UpdateConnectionVisuals()
+    {
+        // Update input connector visual
+        if (inputConnectorRenderer != null)
         {
-            renderer.material = connectorMaterial;
+            // Change material based on connection status
+            if (isInput && connectedConveyor != null && connectedBuilding != null)
+            {
+                if (isHoldingItem)
+                {
+                    // Show orange glow when holding an item
+                    inputConnectorRenderer.material = hasItemMaterial;
+                }
+                else
+                {
+                    // Show brighter glow when waiting for an item
+                    inputConnectorRenderer.material = waitingForItemMaterial;
+                }
+            }
+            else
+            {
+                // Not fully connected
+                inputConnectorRenderer.material = inputNotConnectedMaterial;
+            }
         }
-        else if (renderer != null)
+        
+        // Update output connector visual
+        if (outConnectorRenderer != null)
         {
-            // Default color based on type
+            // Change material based on connection status
+            if (!isInput && connectedConveyor != null && connectedBuilding != null)
+            {
+                if (isHoldingItem)
+                {
+                    // Show orange glow when holding an item
+                    outConnectorRenderer.material = hasItemMaterial;
+                }
+                else
+                {
+                    // Show brighter glow when waiting for an item
+                    outConnectorRenderer.material = waitingForItemMaterial;
+                }
+            }
+            else
+            {
+                // Not fully connected
+                outConnectorRenderer.material = outputNotConnectedMaterial;
+            }
+        }
+    }
+    
+    // Logic for transferring items from building to belt (Input connector)
+    private bool TryTransferFromBuildingToBelt()
+    {
+        // If we're already holding an item, try to place it on the conveyor
+        if (isHoldingItem && heldItem != null)
+        {
+            bool accepted = connectedConveyor.AcceptItem(heldItem, true);
+            if (accepted)
+            {
+                // Item successfully placed on conveyor
+                isHoldingItem = false;
+                heldItem = null;
+                UpdateConnectionVisuals(); // Update visuals to show we're no longer holding an item
+                return true;
+            }
+            return false; // Couldn't place on conveyor, will try again next update
+        }
+        
+        // Implementation depends on your item system
+        // Example: Check if building has items to output
+        if (connectedBuilding is MinerBuilding miner)
+        {
+            // Use GetNextItem instead of TryExtractItem
+            ConveyorItem item = miner.GetNextItem();
+            if (item != null)
+            {
+                // Try to place directly on conveyor first
+                bool accepted = connectedConveyor.AcceptItem(item, true);
+                if (accepted)
+                {
+                    return true;
+                }
+                else
+                {
+                    // If conveyor is full, hold the item temporarily
+                    isHoldingItem = true;
+                    heldItem = item;
+                    UpdateConnectionVisuals(); // Update visuals to show we're holding an item
+                    return true; // We did get an item, even if we couldn't place it yet
+                }
+            }
+        }
+        else if (connectedBuilding is StorageBox storage)
+        {
+            // Similar logic for storage boxes
+            // Use GetItem instead of TryExtractItem
+            ConveyorItem item = storage.GetItem();
+            if (item != null)
+            {
+                bool accepted = connectedConveyor.AcceptItem(item, true);
+                if (accepted)
+                {
+                    return true;
+                }
+                else
+                {
+                    // If conveyor is full, hold the item temporarily
+                    isHoldingItem = true;
+                    heldItem = item;
+                    UpdateConnectionVisuals(); // Update visuals to show we're holding an item
+                    return true; // We did get an item, even if we couldn't place it yet
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Logic for transferring items from belt to building (Output connector)
+    private bool TryTransferFromBeltToBuilding()
+    {
+        // If we're holding an item, try to deliver it to the building
+        if (isHoldingItem && heldItem != null)
+        {
+            bool delivered = false;
             
-            renderer.material.color = isInput ? Color.green : Color.red;
+            if (connectedBuilding is StorageBox storage)
+            {
+                delivered = storage.AcceptItem(heldItem);
+            }
+            // Add other building types as needed
+            
+            if (delivered)
+            {
+                // Item successfully delivered to building
+                isHoldingItem = false;
+                heldItem = null;
+                UpdateConnectionVisuals(); // Update visuals to show we're no longer holding an item
+                return true;
+            }
+            return false; // Couldn't deliver to building, will try again next update
         }
         
-        connectorModel = visual;
+        // This would be called by the conveyor belt when an item reaches this connector
+        // For now, return false as this is implemented differently
+        return false;
+    }
+    
+    // Method for conveyor to deliver items to this connector
+    public bool AcceptItemFromBelt(ConveyorItem item)
+    {
+        if (!isInput)
+        {
+            // If we're already holding an item, reject new ones
+            if (isHoldingItem)
+                return false;
+                
+            if (connectedBuilding != null)
+            {
+                // Try to deliver directly to the connected building
+                bool delivered = false;
+                
+                if (connectedBuilding is StorageBox storage)
+                {
+                    delivered = storage.AcceptItem(item);
+                }
+                // Add other building types as needed
+                
+                if (delivered)
+                {
+                    return true;
+                }
+                else
+                {
+                    // If building can't accept it now, hold the item temporarily
+                    isHoldingItem = true;
+                    heldItem = item;
+                    UpdateConnectionVisuals(); // Update visuals to show we're holding an item
+                    return true; // We did accept the item, even if we couldn't deliver it yet
+                }
+            }
+        }
+        return false;
     }
 }

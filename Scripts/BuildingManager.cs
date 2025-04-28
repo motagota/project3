@@ -9,13 +9,17 @@ public class BuildingManager : MonoBehaviour
     public GameObject storageBoxPrefab;
     public GameObject conveyorBeltPrefab; // New prefab for conveyor belt
     public GameObject conveyorConnectorPrefab; // New prefab for conveyor connector
-    
+    public GameObject inputConnectorPrefab; // Input connector (building to belt)
+    public GameObject outputConnectorPrefab; // Output connector (belt to building)
+
     [Header("UI References")]
     public GameObject toolbar;
     public Button minerButton;
     public Button storageBoxButton;
     public Button conveyorBeltButton; // New button for conveyor belt
     public Button connectorButton; // New button for connector
+    public Button inputConnectorButton; // Input connector button
+    public Button outputConnectorButton; // Output connector button
     
     [Header("Placement Settings")]
     public Material ghostMaterial; 
@@ -40,8 +44,10 @@ public class BuildingManager : MonoBehaviour
         None,
         Miner,
         StorageBox,
-        ConveyorBelt, // New building type
-        Connector     // New building type
+        ConveyorBelt,
+        Connector,
+        InputConnector,
+        OutputConnector
     }
     
     private void Start()
@@ -68,6 +74,17 @@ public class BuildingManager : MonoBehaviour
         if (connectorButton != null)
         {
             connectorButton.onClick.AddListener(() => SelectBuilding(BuildingType.Connector));
+        }
+        
+        // Set up connector button listeners
+        if (inputConnectorButton != null)
+        {
+            inputConnectorButton.onClick.AddListener(() => SelectBuilding(BuildingType.InputConnector));
+        }
+        
+        if (outputConnectorButton != null)
+        {
+            outputConnectorButton.onClick.AddListener(() => SelectBuilding(BuildingType.OutputConnector));
         }
         
         // If gridTileLayer is not set, try to find the layer by name
@@ -179,8 +196,227 @@ public class BuildingManager : MonoBehaviour
                 
                 // Update ghost color based on placement validity
                 UpdateGhostColor(canPlace);
+                
+                // If this is a connector ghost, show potential connections
+                if (selectedBuilding == BuildingType.Connector && canPlace)
+                {
+                    PreviewConnectorConnections(currentGhost, position);
+                }
             }
         }
+    }
+    
+    private void PreviewConnectorConnections(GameObject ghostConnector, Vector3 position)
+    {
+        // Find all buildings within a certain radius
+        Collider[] colliders = Physics.OverlapSphere(position, 2f, buildingLayer);
+        
+        // Get references to the input and output objects in the ghost
+        Transform inputObject = ghostConnector.transform.Find("InputConnector");
+        Transform outputObject = ghostConnector.transform.Find("OutputConnector");
+        
+        if (inputObject == null || outputObject == null)
+        {
+            Debug.LogWarning("Ghost connector is missing input or output objects!");
+            return;
+        }
+        
+        // Create different materials for input and output
+        Material inputMaterial = new Material(ghostMaterial);
+        inputMaterial.color = new Color(0, 0.8f, 0, 0.7f); // Green for input
+        
+        Material outputMaterial = new Material(ghostMaterial);
+        outputMaterial.color = new Color(0.8f, 0, 0, 0.7f); // Red for output
+        
+        // Apply materials to input and output objects
+        foreach (var renderer in inputObject.GetComponentsInChildren<Renderer>())
+        {
+            var materials = new Material[renderer.materials.Length];
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i] = inputMaterial;
+            }
+            renderer.materials = materials;
+        }
+        
+        foreach (var renderer in outputObject.GetComponentsInChildren<Renderer>())
+        {
+            var materials = new Material[renderer.materials.Length];
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i] = outputMaterial;
+            }
+            renderer.materials = materials;
+        }
+        
+        // Reset positions first
+        inputObject.localPosition = new Vector3(-0.25f, 0, 0);
+        outputObject.localPosition = new Vector3(0.25f, 0, 0);
+        
+        bool foundInputConnection = false;
+        bool foundOutputConnection = false;
+        GameObject inputConnectedObject = null;
+        GameObject outputConnectedObject = null;
+        
+        // Create debug visualization (optional, can be removed in final version)
+        GameObject leftDebug = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        leftDebug.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        leftDebug.transform.position = ghostConnector.transform.position - ghostConnector.transform.right * 0.5f;
+        Renderer leftRenderer = leftDebug.GetComponent<Renderer>();
+        leftRenderer.material = inputMaterial;
+        Destroy(leftDebug, 0.1f); // Remove quickly as this is just for preview
+        
+        GameObject rightDebug = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        rightDebug.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        rightDebug.transform.position = ghostConnector.transform.position + ghostConnector.transform.right * 0.5f;
+        Renderer rightRenderer = rightDebug.GetComponent<Renderer>();
+        rightRenderer.material = outputMaterial;
+        Destroy(rightDebug, 0.1f); // Remove quickly as this is just for preview
+        
+        // Define the grid size (assuming 1 unit grid)
+        float gridSize = 1.0f;
+        
+        foreach (var collider in colliders)
+        {
+            // Skip the ghost itself
+            if (collider.gameObject == ghostConnector)
+                continue;
+                
+            // Get direction and distance to the collider
+            Vector3 directionToCollider = collider.transform.position - ghostConnector.transform.position;
+            float distance = directionToCollider.magnitude;
+            
+            // Check if the object is directly adjacent (using grid size with small tolerance)
+            bool isDirectlyAdjacent = Mathf.Approximately(distance, gridSize) || distance < gridSize * 1.1f;
+            
+            // Skip if not directly adjacent
+            if (!isDirectlyAdjacent)
+                continue;
+                
+            // Now check direction
+            directionToCollider = directionToCollider.normalized;
+            float rightDot = Vector3.Dot(ghostConnector.transform.right, directionToCollider);
+            float forwardDot = Vector3.Dot(ghostConnector.transform.forward, directionToCollider);
+            
+            // Check if it's aligned with right or left (not diagonal)
+            bool isAlignedHorizontally = Mathf.Abs(rightDot) > 0.7f && Mathf.Abs(forwardDot) < 0.3f;
+            
+            // Skip if not aligned horizontally (diagonal connections not allowed)
+            if (!isAlignedHorizontally)
+                continue;
+                
+            bool isInRightDirection = rightDot > 0.7f; // Object is to the right
+            bool isInLeftDirection = rightDot < -0.7f; // Object is to the left
+            
+            // Check for conveyor belts
+            ConveyorBelt conveyor = collider.GetComponent<ConveyorBelt>();
+            if (conveyor != null)
+            {
+                // For input connections (left side)
+                if (isInLeftDirection && !foundInputConnection)
+                {
+                    foundInputConnection = true;
+                    inputConnectedObject = collider.gameObject;
+                }
+                // For output connections (right side)
+                else if (isInRightDirection && !foundOutputConnection)
+                {
+                    foundOutputConnection = true;
+                    outputConnectedObject = collider.gameObject;
+                }
+                continue;
+            }
+            
+            // Check for miners
+            MinerBuilding miner = collider.GetComponent<MinerBuilding>();
+            if (miner != null)
+            {
+                // For input connections (left side)
+                if (isInLeftDirection && !foundInputConnection)
+                {
+                    foundInputConnection = true;
+                    inputConnectedObject = collider.gameObject;
+                }
+                // For output connections (right side)
+                else if (isInRightDirection && !foundOutputConnection)
+                {
+                    foundOutputConnection = true;
+                    outputConnectedObject = collider.gameObject;
+                }
+                continue;
+            }
+            
+            // Check for storage boxes
+            StorageBox storage = collider.GetComponent<StorageBox>();
+            if (storage != null)
+            {
+                // For input connections (left side)
+                if (isInLeftDirection && !foundInputConnection)
+                {
+                    foundInputConnection = true;
+                    inputConnectedObject = collider.gameObject;
+                }
+                // For output connections (right side)
+                else if (isInRightDirection && !foundOutputConnection)
+                {
+                    foundOutputConnection = true;
+                    outputConnectedObject = collider.gameObject;
+                }
+                continue;
+            }
+        }
+        
+        // Position the input object on the connected object if found
+        if (foundInputConnection && inputConnectedObject != null)
+        {
+            // Position the input object on top of the connected object
+            Vector3 newPosition = inputConnectedObject.transform.position;
+            newPosition.y += 0.1f; // Slight height offset
+            
+            // Move the input object to the new position
+            inputObject.position = newPosition;
+            Debug.Log($"Positioned input object on connected object at {newPosition}");
+        }
+        else
+        {
+            // Reset input object to its default position
+            inputObject.localPosition = new Vector3(-0.25f, 0, 0); // Default offset
+            Debug.Log("Reset input object to default position");
+        }
+        
+        // Position the output object on the connected object if found
+        if (foundOutputConnection && outputConnectedObject != null)
+        {
+            // Position the output object on top of the connected object
+            Vector3 newPosition = outputConnectedObject.transform.position;
+            newPosition.y += 0.1f; // Slight height offset
+            
+            // Move the output object to the new position
+            outputObject.position = newPosition;
+            Debug.Log($"Positioned output object on connected object at {newPosition}");
+        }
+        else
+        {
+            // Reset output object to its default position
+            outputObject.localPosition = new Vector3(0.25f, 0, 0); // Default offset
+            Debug.Log("Reset output object to default position");
+        }
+    }
+    
+    // Helper method to visualize connections with a line
+    private void HighlightConnection(Vector3 start, Vector3 end, Color color)
+    {
+        GameObject line = new GameObject("ConnectionLine");
+        LineRenderer lr = line.AddComponent<LineRenderer>();
+        lr.material = new Material(Shader.Find("Sprites/Default"));
+        lr.startColor = color;
+        lr.endColor = color;
+        lr.startWidth = 0.05f;
+        lr.endWidth = 0.05f;
+        lr.positionCount = 2;
+        lr.SetPosition(0, start);
+        lr.SetPosition(1, end);
+        Destroy(line, 0.1f); // Remove quickly as this is just for preview
     }
     
     private bool IsValidPlacement(GridTile tile)
@@ -210,35 +446,102 @@ public class BuildingManager : MonoBehaviour
         // For connectors, check if there's a building nearby to connect to
         else if (selectedBuilding == BuildingType.Connector)
         {
-            // Check for nearby buildings (miners or storage boxes)
+            // First check if the tile is empty
+            if (hasBuildingOnTile)
+                return false;
+                
+            // Check for nearby buildings that could connect to input and output
             Collider[] nearbyObjects = Physics.OverlapSphere(tile.transform.position, 1.5f, buildingLayer);
-            bool hasNearbyBuilding = false;
-            bool hasNearbyConveyor = false;
             
+            bool hasInputConnection = false;
+            bool hasOutputConnection = false;
+            
+            // Create a temporary ghost to check connections
+            GameObject tempGhost = null;
+            if (currentGhost != null)
+            {
+                tempGhost = currentGhost;
+            }
+            else
+            {
+                // If no ghost exists (shouldn't happen), create one temporarily
+                tempGhost = CreateGhost(conveyorConnectorPrefab);
+                tempGhost.transform.position = tile.transform.position;
+                tempGhost.transform.rotation = Quaternion.Euler(0, currentRotation, 0);
+            }
+            
+            // Check each nearby object for potential connections
             foreach (var collider in nearbyObjects)
             {
-                // Check for buildings
-                if (collider.GetComponent<MinerBuilding>() != null || 
-                    collider.GetComponent<StorageBox>() != null)
+                // Skip the ghost itself
+                if (collider.gameObject == tempGhost)
+                    continue;
+                        
+                // Get direction and distance to the collider
+                Vector3 directionToCollider = collider.transform.position - tempGhost.transform.position;
+                float distance = directionToCollider.magnitude;
+                
+                // Check if the object is directly adjacent (using grid size with small tolerance)
+                bool isDirectlyAdjacent = Mathf.Approximately(distance, 1.0f) || distance < 1.1f;
+                
+                // Skip if not directly adjacent
+                if (!isDirectlyAdjacent)
+                    continue;
+                    
+                // Now check direction
+                directionToCollider = directionToCollider.normalized;
+                float rightDot = Vector3.Dot(tempGhost.transform.right, directionToCollider);
+                float forwardDot = Vector3.Dot(tempGhost.transform.forward, directionToCollider);
+                
+                // Check if it's aligned with right or left (not diagonal)
+                bool isAlignedHorizontally = Mathf.Abs(rightDot) > 0.7f && Mathf.Abs(forwardDot) < 0.3f;
+                
+                // Skip if not aligned horizontally (diagonal connections not allowed)
+                if (!isAlignedHorizontally)
+                    continue;
+                    
+                bool isInRightDirection = rightDot > 0.7f; // Object is to the right
+                bool isInLeftDirection = rightDot < -0.7f; // Object is to the left
+                
+                // Check for miners - they can only output items, not receive them
+                MinerBuilding miner = collider.GetComponent<MinerBuilding>();
+                if (miner != null)
                 {
-                    hasNearbyBuilding = true;
+                    // Miners can only be on the left side (as output to connector)
+                    if (isInLeftDirection)
+                    {
+                        hasInputConnection = true;
+                    }
+                    // Miners cannot be on the right side (cannot receive items)
+                    continue;
                 }
                 
-                // Check for conveyor belts
-                if (collider.GetComponent<ConveyorBelt>() != null)
-                {
-                    hasNearbyConveyor = true;
-                }
+                // Check for other valid buildings
+                bool isStorageBox = collider.GetComponent<StorageBox>() != null;
+                bool isConveyor = collider.GetComponent<ConveyorBelt>() != null;
                 
-                // If we found both, we can stop checking
-                if (hasNearbyBuilding && hasNearbyConveyor)
+                if (isStorageBox || isConveyor)
                 {
-                    break;
+                    if (isInLeftDirection)
+                    {
+                        hasInputConnection = true;
+                    }
+                    
+                    if (isInRightDirection)
+                    {
+                        hasOutputConnection = true;
+                    }
                 }
             }
             
-            // Valid if: no building on this tile AND (has nearby building OR has nearby conveyor)
-            return !hasBuildingOnTile && (hasNearbyBuilding || hasNearbyConveyor);
+            // If we created a temporary ghost, destroy it
+            if (tempGhost != currentGhost)
+            {
+                Destroy(tempGhost);
+            }
+            
+            // Valid only if both input and output connections are available
+            return hasInputConnection && hasOutputConnection;
         }
         
         return false;
@@ -475,38 +778,145 @@ public class BuildingManager : MonoBehaviour
         // Find all buildings within a certain radius
         Collider[] colliders = Physics.OverlapSphere(position, 2f, buildingLayer);
         
+        // Get references to the input and output objects (assuming they are child objects)
+        Transform inputObject = connector.transform.Find("InputConnector");
+        Transform outputObject = connector.transform.Find("OutputConnector");
+        
+        if (inputObject == null || outputObject == null)
+        {
+            Debug.LogError("Connector is missing input or output objects!");
+            return;
+        }
+        
+        bool foundInputConnection = false;
+        bool foundOutputConnection = false;
+        GameObject inputConnectedObject = null;
+        GameObject outputConnectedObject = null;
+        
         foreach (var collider in colliders)
         {
             // Skip the connector itself
             if (collider.gameObject == connector.gameObject)
                 continue;
                 
+            // Get direction to the collider
+            Vector3 directionToCollider = (collider.transform.position - connector.transform.position).normalized;
+            float rightDot = Vector3.Dot(connector.transform.right, directionToCollider);
+            bool isInRightDirection = rightDot > 0.5f; // Object is to the right
+            bool isInLeftDirection = rightDot < -0.5f; // Object is to the left
+            
             // Check for conveyor belts
             ConveyorBelt conveyor = collider.GetComponent<ConveyorBelt>();
             if (conveyor != null)
             {
-                connector.ConnectToConveyor(conveyor);
-                conveyor.RegisterConnector(connector); // New line
-                Debug.Log("Connector connected to conveyor belt");
-                continue; // Skip to next collider after connecting
+                // For input connections (left side)
+                if (isInLeftDirection && !foundInputConnection)
+                {
+                    connector.ConnectToConveyor(conveyor);
+                    conveyor.RegisterConnector(connector);
+                    Debug.Log("Input connector connected to conveyor belt on left side");
+                    
+                    foundInputConnection = true;
+                    inputConnectedObject = collider.gameObject;
+                }
+                // For output connections (right side)
+                else if (isInRightDirection && !foundOutputConnection)
+                {
+                    connector.ConnectToConveyor(conveyor);
+                    conveyor.RegisterConnector(connector);
+                    Debug.Log("Output connector connected to conveyor belt on right side");
+                    
+                    foundOutputConnection = true;
+                    outputConnectedObject = collider.gameObject;
+                }
+                continue;
             }
             
-            // Check for other buildings (miners, storage boxes, etc.)
+            // Check for miners
             MinerBuilding miner = collider.GetComponent<MinerBuilding>();
             if (miner != null)
             {
-                connector.ConnectToBuilding(miner);
-                Debug.Log("Connector connected to miner");
+                // For input connections (left side)
+                if (isInLeftDirection && !foundInputConnection)
+                {
+                    connector.ConnectToBuilding(miner);
+                    Debug.Log("Input connector connected to miner on left side");
+                    
+                    foundInputConnection = true;
+                    inputConnectedObject = collider.gameObject;
+                }
+                // For output connections (right side)
+                else if (isInRightDirection && !foundOutputConnection)
+                {
+                    connector.ConnectToBuilding(miner);
+                    Debug.Log("Output connector connected to miner on right side");
+                    
+                    foundOutputConnection = true;
+                    outputConnectedObject = collider.gameObject;
+                }
                 continue;
             }
             
+            // Check for storage boxes
             StorageBox storage = collider.GetComponent<StorageBox>();
             if (storage != null)
             {
-                connector.ConnectToBuilding(storage);
-                Debug.Log("Connector connected to storage box");
+                // For input connections (left side)
+                if (isInLeftDirection && !foundInputConnection)
+                {
+                    connector.ConnectToBuilding(storage);
+                    Debug.Log("Input connector connected to storage box on left side");
+                    
+                    foundInputConnection = true;
+                    inputConnectedObject = collider.gameObject;
+                }
+                // For output connections (right side)
+                else if (isInRightDirection && !foundOutputConnection)
+                {
+                    connector.ConnectToBuilding(storage);
+                    Debug.Log("Output connector connected to storage box on right side");
+                    
+                    foundOutputConnection = true;
+                    outputConnectedObject = collider.gameObject;
+                }
                 continue;
             }
+        }
+        
+        // Position the input object on the connected object if found
+        if (foundInputConnection && inputConnectedObject != null)
+        {
+            // Position the input object on top of the connected object
+            Vector3 newPosition = inputConnectedObject.transform.position;
+            newPosition.y += 0.1f; // Slight height offset
+            
+            // Move the input object to the new position
+            inputObject.position = newPosition;
+            Debug.Log($"Positioned input object on connected object at {newPosition}");
+        }
+        else
+        {
+            // Reset input object to its default position
+            inputObject.localPosition = new Vector3(-0.25f, 0, 0); // Default offset
+            Debug.Log("Reset input object to default position");
+        }
+        
+        // Position the output object on the connected object if found
+        if (foundOutputConnection && outputConnectedObject != null)
+        {
+            // Position the output object on top of the connected object
+            Vector3 newPosition = outputConnectedObject.transform.position;
+            newPosition.y += 0.1f; // Slight height offset
+            
+            // Move the output object to the new position
+            outputObject.position = newPosition;
+            Debug.Log($"Positioned output object on connected object at {newPosition}");
+        }
+        else
+        {
+            // Reset output object to its default position
+            outputObject.localPosition = new Vector3(0.25f, 0, 0); // Default offset
+            Debug.Log("Reset output object to default position");
         }
     }
 
