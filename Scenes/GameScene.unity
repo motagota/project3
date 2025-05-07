@@ -1932,6 +1932,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1448104588}
   m_CullTransparentMesh: 1
+--- !u!1 &1492443786
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1492443788}
+  - component: {fileID: 1492443787}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1492443787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492443786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a09fbe5ad769d82498099ed34e538665, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minerPrefab: {fileID: 2844866772905838915, guid: e8644b528d9b9d74785a29602cb59007, type: 3}
+  conveyorBeltPrefab: {fileID: 7671053401003432854, guid: b3715f31c8ce60e479f87365c220de38, type: 3}
+  connectorPrefab: {fileID: 8833482610376921522, guid: 45444daabacbf1c4f9bae6bbaea13641, type: 3}
+  storageBoxPrefab: {fileID: 0}
+  gridManager: {fileID: 1559069618}
+  mapWidth: 20
+  mapHeight: 20
+--- !u!4 &1492443788
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492443786}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 454.5, y: 301, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1559069614
 GameObject:
   m_ObjectHideFlags: 0
@@ -2005,8 +2056,6 @@ MonoBehaviour:
   stoneMaterial: {fileID: 2100000, guid: c259e94c676468a4cbbc7fdc96a25145, type: 2}
   chunkSize: 32
   visibleChunkDistance: 3
-  gridWidth: 10
-  gridHeight: 10
   debugMode: 1
   tileScale: 1
   tileSpacing: 0
@@ -3082,3 +3131,4 @@ SceneRoots:
   - {fileID: 2116298146}
   - {fileID: 2031437904}
   - {fileID: 309548661}
+  - {fileID: 1492443788}

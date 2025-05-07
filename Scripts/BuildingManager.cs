@@ -611,69 +611,94 @@ public class BuildingManager : MonoBehaviour
     // Modify your PlaceBuilding method to call the new connection method
     private void PlaceBuilding()
     {
-        if (currentGhost == null) return;
-
-        GameObject building = null;
+        if (lastHoveredTile == null || !canPlace)
+            return;
+            
+        GameObject newBuilding = null;
         
         switch (selectedBuilding)
         {
             case BuildingType.Miner:
-                building = Instantiate(minerPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+                newBuilding = Instantiate(minerPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
                 break;
             case BuildingType.StorageBox:
-                building = Instantiate(storageBoxPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+                newBuilding = Instantiate(storageBoxPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
                 break;
             case BuildingType.ConveyorBelt:
-                building = Instantiate(conveyorBeltPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+                newBuilding = Instantiate(conveyorBeltPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
                 
-                // Set up the conveyor belt
-                ConveyorBelt newConveyor = building.GetComponent<ConveyorBelt>();
-                if (newConveyor != null)
+                // Set up the conveyor belt input and output points
+                ConveyorBelt conveyor = newBuilding.GetComponent<ConveyorBelt>();
+                if (conveyor != null)
                 {
-                    newConveyor.direction = (int)(currentRotation / 90) % 4;
+                    // Create input point if it doesn't exist
+                    if (conveyor.inputPoint == null)
+                    {
+                        GameObject inputPointObj = new GameObject("InputPoint");
+                        inputPointObj.transform.SetParent(newBuilding.transform);
+                        // Position at the back of the conveyor
+                        inputPointObj.transform.localPosition = new Vector3(0, 0.1f, -0.4f);
+                        conveyor.inputPoint = inputPointObj.transform;
+                    }
                     
-                    // Connect to adjacent conveyors if any
-                    ConnectToAdjacentConveyors(newConveyor);
+                    // Create output point if it doesn't exist
+                    if (conveyor.outputPoint == null)
+                    {
+                        GameObject outputPointObj = new GameObject("OutputPoint");
+                        outputPointObj.transform.SetParent(newBuilding.transform);
+                        // Position at the front of the conveyor
+                        outputPointObj.transform.localPosition = new Vector3(0, 0.1f, 0.4f);
+                        conveyor.outputPoint = outputPointObj.transform;
+                    }
                     
-                    // Remember this conveyor for potential future connections
-                    lastPlacedConveyor = newConveyor;
+                    lastPlacedConveyor = conveyor;
                 }
                 break;
             case BuildingType.Connector:
-                building = Instantiate(conveyorConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+             newBuilding = Instantiate(conveyorConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
                 
                 // Set up the connector
-                ConveyorConnector newConnector = building.GetComponent<ConveyorConnector>();
+                ConveyorConnector newConnector = newBuilding.GetComponent<ConveyorConnector>();
                 if (newConnector != null)
                 {
                     // Find nearby buildings to connect to
-                    ConnectConnectorToNearbyBuildings(newConnector, building.transform.position);
+                    ConnectConnectorToNearbyBuildings(newConnector, newBuilding.transform.position);
                 }
+               
+                break;
+            case BuildingType.InputConnector:
+                newBuilding = Instantiate(inputConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+                break;
+            case BuildingType.OutputConnector:
+                newBuilding = Instantiate(outputConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
                 break;
         }
         
-        // Connect the new building to any nearby connectors
-        if (building != null)
+        if (newBuilding != null)
         {
-            ConnectToNearbyConnectors(building, building.transform.position);
+            // Set the building's grid tile reference
+            IBuilding buildingComponent = newBuilding.GetComponent<IBuilding>();
+            if (buildingComponent != null)
+            {
+                buildingComponent.SetGridTile(lastHoveredTile);
+            }
+            
+            // Mark the tile as occupied
+            lastHoveredTile.SetOccupied(true);
         }
         
-        building.name = selectedBuilding.ToString();
-        
-        // Get the tile under the building
-        Ray ray = new Ray(building.transform.position + Vector3.up, Vector3.down);
+         Ray ray = new Ray(newBuilding.transform.position + Vector3.up, Vector3.down);
         RaycastHit hit;
         
         // Use the gridTileLayer mask to only hit grid tiles
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, gridTileLayer))
-        {
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, gridTileLayer)) {
             GridTile tile = hit.collider.GetComponent<GridTile>();
             if (tile != null)
             {
                 // Link building to tile based on type
                 if (selectedBuilding == BuildingType.Miner)
                 {
-                    MinerBuilding miner = building.GetComponent<MinerBuilding>();
+                    MinerBuilding miner = newBuilding.GetComponent<MinerBuilding>();
                     if (miner != null)
                     {
                         miner.Initialize(tile);
@@ -682,7 +707,7 @@ public class BuildingManager : MonoBehaviour
                 }
                 else if (selectedBuilding == BuildingType.StorageBox)
                 {
-                    StorageBox storage = building.GetComponent<StorageBox>();
+                    StorageBox storage = newBuilding.GetComponent<StorageBox>();
                     if (storage != null)
                     {
                         storage.Initialize(tile);
@@ -690,15 +715,10 @@ public class BuildingManager : MonoBehaviour
                     }
                 }
             }
-            else
-            {
-                Debug.LogError("Hit object doesn't have a GridTile component!");
-            }
         }
-        else
-        {
-            Debug.LogError("Failed to find a grid tile under the building!");
-        }
+
+        // Reset selection after placement
+        CancelPlacement();
     }
     
     private void ConnectToAdjacentConveyors(ConveyorBelt newConveyor)

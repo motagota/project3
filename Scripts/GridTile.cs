@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Represents a single tile in the grid with ground and resource properties
 /// </summary>
-public class GridTile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class GridTile : MonoBehaviour
 {
     // Cell data
     [SerializeField] private int groundType;
@@ -295,5 +295,17 @@ public class GridTile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         this.resourceAmount = _resourceAmount;
     
         // If you need to update visuals or trigger events, do it here
+    }
+    
+    private bool isOccupied = false;
+    
+    public bool IsOccupied 
+    { 
+        get { return isOccupied; } 
+    }
+    
+    public void SetOccupied(bool occupied)
+    {
+        isOccupied = occupied;
     }
 }

@@ -165,7 +165,7 @@ public class ConveyorConnector : MonoBehaviour
         if (outConnectorRenderer != null)
         {
             // Change material based on connection status
-            if (!isInput && connectedConveyor != null && connectedBuilding != null)
+            if ( connectedConveyor != null && connectedBuilding != null)
             {
                 if (_isHoldingItem)
                 {
