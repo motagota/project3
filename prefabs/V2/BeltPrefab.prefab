@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5999429954220690722
+--- !u!1 &4670298833787755928
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,50 +8,47 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2414849489576581982}
-  - component: {fileID: 4446109813959760728}
-  - component: {fileID: 499175953487082058}
-  - component: {fileID: 3393835955786163378}
-  - component: {fileID: 7492541171076085032}
-  - component: {fileID: 1412159847302687123}
-  - component: {fileID: 5464874648783032010}
-  m_Layer: 7
-  m_Name: StoreageBoxPrefab
+  - component: {fileID: 6830086932329308231}
+  - component: {fileID: 7779934790407559747}
+  - component: {fileID: 4724312612409124263}
+  - component: {fileID: 730694949083205674}
+  m_Layer: 0
+  m_Name: BeltPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2414849489576581982
+--- !u!4 &6830086932329308231
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
+  m_GameObject: {fileID: 4670298833787755928}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -19.5, y: 0.01, z: -19.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 9}
+  m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &4446109813959760728
+--- !u!33 &7779934790407559747
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
+  m_GameObject: {fileID: 4670298833787755928}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &499175953487082058
+--- !u!23 &4724312612409124263
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
+  m_GameObject: {fileID: 4670298833787755928}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -90,13 +87,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3393835955786163378
+--- !u!65 &730694949083205674
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
+  m_GameObject: {fileID: 4670298833787755928}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -111,46 +108,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7492541171076085032
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5615c3ac76d7eb049a53fef5c7fde497, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1412159847302687123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6ff4e800d09a16408aff0f572dbc2e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxStorageSlots: 12
-  maxStackSize: 100
---- !u!114 &5464874648783032010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5999429954220690722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e547250fe88f1f49b9cc3a35a8f6da2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  storageId: 0
-  storageBoxMeshObject: {fileID: 0}
-  inputPointTransform: {fileID: 0}
-  outputPointTransform: {fileID: 0}
-  fillLevelIndicator: {fileID: 0}

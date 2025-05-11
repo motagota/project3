@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Simulation;
 using Unity.VisualScripting;
 
 public class BuildingManager : MonoBehaviour
@@ -614,83 +615,31 @@ public class BuildingManager : MonoBehaviour
         if (lastHoveredTile == null || !canPlace)
             return;
             
-        GameObject newBuilding = null;
+        Vector3 position = currentGhost.transform.position;
+        Quaternion rotation = currentGhost.transform.rotation;
         
         switch (selectedBuilding)
         {
             case BuildingType.Miner:
-                newBuilding = Instantiate(minerPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+                int minerId = Simulation.SimulationManager.Instance.AddMiner(position, rotation);
+                ViewManager.Instance.CreateMinerView(minerId);
                 break;
             case BuildingType.StorageBox:
-                newBuilding = Instantiate(storageBoxPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
+                int storageId = Simulation.SimulationManager.Instance.AddStorageBox(position, rotation);
+                ViewManager.Instance.CreateStorageBoxView(storageId);
                 break;
             case BuildingType.ConveyorBelt:
-                newBuilding = Instantiate(conveyorBeltPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
-                
-                // Set up the conveyor belt input and output points
-                ConveyorBelt conveyor = newBuilding.GetComponent<ConveyorBelt>();
-                if (conveyor != null)
-                {
-                    // Create input point if it doesn't exist
-                    if (conveyor.inputPoint == null)
-                    {
-                        GameObject inputPointObj = new GameObject("InputPoint");
-                        inputPointObj.transform.SetParent(newBuilding.transform);
-                        // Position at the back of the conveyor
-                        inputPointObj.transform.localPosition = new Vector3(0, 0.1f, -0.4f);
-                        conveyor.inputPoint = inputPointObj.transform;
-                    }
-                    
-                    // Create output point if it doesn't exist
-                    if (conveyor.outputPoint == null)
-                    {
-                        GameObject outputPointObj = new GameObject("OutputPoint");
-                        outputPointObj.transform.SetParent(newBuilding.transform);
-                        // Position at the front of the conveyor
-                        outputPointObj.transform.localPosition = new Vector3(0, 0.1f, 0.4f);
-                        conveyor.outputPoint = outputPointObj.transform;
-                    }
-                    
-                    lastPlacedConveyor = conveyor;
-                }
+                int conveyorId = Simulation.SimulationManager.Instance.AddConveyorBelt(position, rotation);
+                ViewManager.Instance.CreateConveyorBeltView(conveyorId);
                 break;
             case BuildingType.Connector:
-             newBuilding = Instantiate(conveyorConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
-                
-                // Set up the connector
-                ConveyorConnector newConnector = newBuilding.GetComponent<ConveyorConnector>();
-                if (newConnector != null)
-                {
-                    // Find nearby buildings to connect to
-                    ConnectConnectorToNearbyBuildings(newConnector, newBuilding.transform.position);
-                }
-               
+             //   int connectorId = SimulationManager.Instance.AddConnector(position, rotation);
+             //   ViewManager.Instance.CreateConnectorView(connectorId);
                 break;
-            case BuildingType.InputConnector:
-                newBuilding = Instantiate(inputConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
-                break;
-            case BuildingType.OutputConnector:
-                newBuilding = Instantiate(outputConnectorPrefab, currentGhost.transform.position, currentGhost.transform.rotation);
-                break;
-        }
+        }        
         
-        if (newBuilding != null)
-        {
-            // Set the building's grid tile reference
-            IBuilding buildingComponent = newBuilding.GetComponent<IBuilding>();
-            if (buildingComponent != null)
-            {
-                buildingComponent.SetGridTile(lastHoveredTile);
-            }
-            
-            // Mark the tile as occupied
-            lastHoveredTile.SetOccupied(true);
-        }
-        
-         Ray ray = new Ray(newBuilding.transform.position + Vector3.up, Vector3.down);
+         Ray ray = new Ray(position + Vector3.up, Vector3.down);
         RaycastHit hit;
-        
-        // Use the gridTileLayer mask to only hit grid tiles
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, gridTileLayer)) {
             GridTile tile = hit.collider.GetComponent<GridTile>();
             if (tile != null)
@@ -698,25 +647,28 @@ public class BuildingManager : MonoBehaviour
                 // Link building to tile based on type
                 if (selectedBuilding == BuildingType.Miner)
                 {
-                    MinerBuilding miner = newBuilding.GetComponent<MinerBuilding>();
-                    if (miner != null)
-                    {
-                        miner.Initialize(tile);
-                        Debug.Log($"Miner initialized with tile at position {tile.transform.position}");
-                    }
+                   // MinerBuilding miner = newBuilding.GetComponent<MinerBuilding>();
+                   // if (miner != null)
+                   // {
+                   //     miner.Initialize(tile);
+                   //     Debug.Log($"Miner initialized with tile at position {tile.transform.position}");
+                   // }
                 }
                 else if (selectedBuilding == BuildingType.StorageBox)
                 {
-                    StorageBox storage = newBuilding.GetComponent<StorageBox>();
-                    if (storage != null)
-                    {
-                        storage.Initialize(tile);
-                        Debug.Log($"Storage box initialized with tile at position {tile.transform.position}");
-                    }
+                   // StorageBox storage = newBuilding.GetComponent<StorageBox>();
+                   // if (storage != null)
+                   // {
+                    //    storage.Initialize(tile);
+                   //     Debug.Log($"Storage box initialized with tile at position {tile.transform.position}");
+                    //}
                 }
             }
         }
-
+        
+        // Mark the tile as occupied
+     //   lastHoveredTile.isOccupied = true;
+        
         // Reset selection after placement
         CancelPlacement();
     }
