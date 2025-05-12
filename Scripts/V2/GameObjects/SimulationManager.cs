@@ -72,14 +72,22 @@ public class SimulationManagerV2 : MonoBehaviour
         createNewMachine(newChunk,new Vector2Int(9, 8));
         
         
-        createNewBelt(newChunk,new Vector2Int(5, 10));
-        createNewBelt(newChunk,new Vector2Int(6, 10));
-        createNewBelt(newChunk,new Vector2Int(7, 10));
-        createNewBelt(newChunk,new Vector2Int(8, 10));
-        createNewBelt(newChunk,new Vector2Int(9, 10));
-        createNewBelt(newChunk,new Vector2Int(10, 10));
-        createNewBelt(newChunk,new Vector2Int(11, 10));
-        createNewBelt(newChunk,new Vector2Int(12, 10));
+        BeltData newBelt = createNewBelt(newChunk,new Vector2Int(5, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(6, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(7, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(8, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(9, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(10, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(11, 10));
+        newBelt.Rotate(newChunk);
+        newBelt =createNewBelt(newChunk,new Vector2Int(12, 10));
+        newBelt.Rotate(newChunk);
         
         createNewMachine(newChunk,new Vector2Int(5, 12));
         createNewMachine(newChunk,new Vector2Int(6, 12));
@@ -130,25 +138,69 @@ public class SimulationManagerV2 : MonoBehaviour
         tmpConnector.Rotate(newChunk);
         tmpConnector.Rotate(newChunk);
         
+        tmpConnector = createNewConnector(newChunk,new Vector2Int(5, 13));
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+
+        tmpConnector = createNewConnector(newChunk,new Vector2Int(6, 13));
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        
+        tmpConnector = createNewConnector(newChunk,new Vector2Int(7, 13));
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        
+        tmpConnector = createNewConnector(newChunk,new Vector2Int(8, 13));
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        
+        tmpConnector = createNewConnector(newChunk,new Vector2Int(9, 13));
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        tmpConnector.Rotate(newChunk);
+        
+        
+        
+       
+        List<string> inputTypes = new List<string> { "Iron" };
+        Recipe consumptionRecipe = new Recipe(
+            duration: 1.0f,
+            outputItemType: "ProcessedIron",
+            inputItemTypes: inputTypes,
+            inputItemCount: 1
+        );
+
+        createNewMachine(newChunk,new Vector2Int(11, 12), consumptionRecipe);
+        
+        foreach (var belt in newChunk.GetBelts())
+        {
+            belt.CheckConnections(newChunk);
+        }
+        
+        tmpConnector = createNewConnector(newChunk,new Vector2Int(11, 11));
+        tmpConnector.Rotate(newChunk);
+
         MarkChunkDirty(newChunk.Coords);
     }
 
-    public void createNewBelt(ChunkData chunk, Vector2Int coords)
+    public BeltData createNewBelt(ChunkData chunk, Vector2Int coords)
     {
-        var belt = new BeltData(coords);
+        BeltData belt = new BeltData(coords);
         chunk.AddBelt(belt);
+        belt.CheckConnections(chunk);
+        return belt;
     }
-    
-    public void createNewBelt(ChunkData chunk, Vector2 worldPosition)
-    {
-        Vector2Int gridPosition = GridUtility.SnapToGrid(worldPosition);
-        createNewBelt(chunk, gridPosition);
-    }
+  
 
-    public void createNewMachine(ChunkData chunk, Vector2Int coords)
+    public void createNewMachine(ChunkData chunk, Vector2Int coords, Recipe recipe = null)
     {
      
         var machine = new Machine(coords);
+        if (recipe != null) machine.CurrentRecipe = recipe;
         chunk.AddMachine(machine);
         machine.OnRecipeCompleted += OnMachineCompletedRecipe;
     }

@@ -38,6 +38,11 @@ namespace V2.GameObjects
                 beltGO.transform.position = new Vector3(belt.LocalPostion.x, 0, belt.LocalPostion.y);
                 beltGO.transform.rotation =  Quaternion.Euler(0, belt.Rotation, 0);
                 beltGO.transform.SetParent(transform);
+                BeltRenderer beltRenderer = beltGO.GetComponent<BeltRenderer>();
+                if (beltRenderer != null)
+                {
+                    beltRenderer.Initialize(belt);
+                }
                 _beltGOs.Add(belt.LocalPostion, beltGO);
             }
         }

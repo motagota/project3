@@ -81,7 +81,17 @@ namespace V2.Data
             {
                 m.Tick(dt);
               
-            }  
+            }
+
+            foreach (var c in _connectors)
+            {
+                c.Tick(dt);
+            }
+
+            foreach (var b in _belts)
+            {   
+                b.Tick(dt);
+            };
             MarkDirty();
         }
 

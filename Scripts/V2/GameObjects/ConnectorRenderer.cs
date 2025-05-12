@@ -17,7 +17,8 @@ namespace V2.GameObjects
         public Material outputNotConnectedMaterial; // Material when not connected
         
         public Material connectedMaterial;
-        public Material waitingForItemMaterial; 
+        public Material waitingForItemMaterial;
+        public Material hasItemMaterial;
         
         private Connector _connectorData;
         
@@ -30,13 +31,6 @@ namespace V2.GameObjects
         {
             _connectorData = connectorData;
             connectorData.OnConnectionChanged += OnConnectionChanged;
-
-            Entity machine = connectorData.GetConnectedMachine();
-            if (machine != null)
-            {
-                //inputConnectorRenderer.gameObject.transform.position= new Vector3( machine.LocalPostion.x, 0, machine.LocalPostion.y);        
-                
-            }
 
         }
 
@@ -64,6 +58,13 @@ namespace V2.GameObjects
                 waitingForItemMaterial.EnableKeyword("_EMISSION");
                 waitingForItemMaterial.SetColor("_EmissionColor", new Color(0.5f, 0.5f, 1.0f) * 1.5f);
             }
+            
+            if (hasItemMaterial == null)
+            {
+                hasItemMaterial = new Material(connectedMaterial);
+                hasItemMaterial.EnableKeyword("_EMISSION");
+                hasItemMaterial.SetColor("_EmissionColor", new Color(1.0f, 0.5f, 0.0f) * 1.5f); 
+            }
         }
 
         public void Update()
@@ -84,12 +85,36 @@ namespace V2.GameObjects
 
         private void UpdateVisuals()
         {
-            bool isConnected = _connectorData.GetConnectedMachine() != null;
+            bool inputIsConnected = _connectorData.GetInputConnectedMachine() != null;
+            bool outputIsConnected = _connectorData.GetOutputConnectedMachine() != null;
 
             if (inputConnectorRenderer != null)
             {
-                inputConnectorRenderer.material = isConnected ? waitingForItemMaterial : inputNotConnectedMaterial;
+                if (_connectorData.HasInputItem)
+                {
+                    inputConnectorRenderer.material = hasItemMaterial;
+                }
+                else
+                {
+                    inputConnectorRenderer.material =
+                        inputIsConnected ? waitingForItemMaterial : inputNotConnectedMaterial;
+                }
             }
+
+            if (outConnectorRenderer != null)
+            {
+                if (_connectorData.CanDropItem)
+                {
+                    outConnectorRenderer.material =
+                        outputIsConnected ? waitingForItemMaterial : outputNotConnectedMaterial;
+                }
+                else
+                {
+                   outConnectorRenderer.material = hasItemMaterial;
+                }
+            }
+            
+            
         }
     }
 }

@@ -20,8 +20,7 @@ public class ChunkRenderManager : MonoBehaviour
     private void Awake()
     {
         _sim = FindObjectOfType<SimulationManagerV2>();
-        
-        // initalise game object pool
+
 
         for (int i = 0; i < gameObjectPoolSize; i++)
         {

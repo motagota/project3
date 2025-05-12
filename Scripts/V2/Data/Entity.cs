@@ -13,18 +13,14 @@ namespace V2.Data
         public Entity(Vector2Int localPosition)
         {
             ID = IDCounter++;
-            // Ensure the position is already a grid position (Vector2Int guarantees integers)
             LocalPostion = localPosition;
             Rotation = 0;
         }
 
-        // Add method to update position with grid snapping
         public void SetPosition(Vector2Int newPosition)
         {
             LocalPostion = newPosition;
         }
-
-        // Add method to update position with automatic grid snapping
         public void SetPosition(Vector2 worldPosition)
         {
             LocalPostion = GridUtility.SnapToGrid(worldPosition);
