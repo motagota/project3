@@ -72,8 +72,6 @@ namespace V2.Data
         /// <returns>A new Recipe instance</returns>
         public static Recipe CreateRecyclingRecipe(string inputType, string outputType, float duration)
         {
-            // Currently limited to one output type due to Recipe class limitations
-            // This could be expanded in the future
             return new Recipe(
                 duration: duration,
                 outputItemType: outputType,
