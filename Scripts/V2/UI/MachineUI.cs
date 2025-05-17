@@ -132,7 +132,10 @@ namespace V2.UI
         
         private void UpdateProgressBar()
         {
+            
             if (_currentMachine == null || progressBar == null) return;
+            if(_currentMachine.CurrentRecipe == null) return;
+            
             float progress = _currentMachine.Progress / _currentMachine.CurrentRecipe.Duration;
             progressBar.value = progress;
         }

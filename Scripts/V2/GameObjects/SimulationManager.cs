@@ -72,6 +72,12 @@ public class SimulationManagerV2 : MonoBehaviour
         minerConnector1.Rotate(newChunk);
         minerConnector1.Rotate(newChunk);
         
+        
+        createNewMachine(newChunk,new Vector2Int(15, 6));
+        
+        Connector tmpConnector = createNewConnector(newChunk,new Vector2Int(15, 5));
+        tmpConnector.Rotate(newChunk);
+       
       /* 
         createNewBelt(newChunk,new Vector2Int(5, 6));
         createNewBelt(newChunk,new Vector2Int(6, 6));
@@ -79,7 +85,7 @@ public class SimulationManagerV2 : MonoBehaviour
         createNewBelt(newChunk,new Vector2Int(8, 6));
         createNewBelt(newChunk,new Vector2Int(9, 6));
 
-        createNewMachine(newChunk,new Vector2Int(5, 8));
+        
         createNewMachine(newChunk,new Vector2Int(6, 8));
         createNewMachine(newChunk,new Vector2Int(7, 8));
         createNewMachine(newChunk,new Vector2Int(8, 8));

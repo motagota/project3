@@ -37,7 +37,7 @@ namespace V2.Data
         
         public Machine(Vector2Int localPosition) : base(localPosition)
         {
-            CurrentRecipe = new Recipe(1);
+            CurrentRecipe = null;
         }
 
         public override void Tick(float dt)
@@ -46,7 +46,9 @@ namespace V2.Data
            
             if (!IsEnabled)
                 return;
-        
+
+            if (CurrentRecipe == null) return;
+            
             if (CurrentRecipe.InputItemCount > 0)
             {
                 _consumptionTimer += dt;
@@ -126,6 +128,8 @@ namespace V2.Data
         
         public virtual bool CanAcceptItem(SimulationItem item)
         {
+            if (CurrentRecipe == null) return false;
+            
             return CurrentRecipe.RequiresItemType(item.ItemType);
         }
  
