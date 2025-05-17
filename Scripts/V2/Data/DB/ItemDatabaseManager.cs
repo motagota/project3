@@ -43,7 +43,6 @@ namespace V2.Data.DB
 
             try
             {
-
                 string json = File.ReadAllText(fullPath);
                 ItemCollection collection = JsonUtility.FromJson<ItemCollection>(json);
 

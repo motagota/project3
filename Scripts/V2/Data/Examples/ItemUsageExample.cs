@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace V2.Data.Examples
 {
-    /// <summary>
-    /// Example script demonstrating how to use the Item Database system.
-    /// </summary>
     public class ItemUsageExample : MonoBehaviour
     {
         // Reference to the item database
@@ -31,9 +28,6 @@ namespace V2.Data.Examples
            
         }
         
-        /// <summary>
-        /// Log all available items in the database.
-        /// </summary>
         private void LogAvailableItems()
         {
             Debug.Log("=== Available Items ===");
@@ -48,9 +42,6 @@ namespace V2.Data.Examples
             Debug.Log("=== End of Items ===");
         }
         
-        /// <summary>
-        /// Create and add a custom item to the database.
-        /// </summary>
         private void CreateCustomItem()
         {
             // Create a new item definition
@@ -68,10 +59,6 @@ namespace V2.Data.Examples
             Debug.Log("Added custom item: AdvancedCircuit");
         }
         
-        /// <summary>
-        /// Find and log items by category.
-        /// </summary>
-        /// <param name="category">The category to search for</param>
         private void FindItemsByCategory(string category)
         {
             Debug.Log($"=== Items in Category: {category} ===");
@@ -86,9 +73,6 @@ namespace V2.Data.Examples
             Debug.Log($"=== End of {category} Items ===");
         }
         
-        /// <summary>
-        /// Demonstrate using the ItemFactory.
-        /// </summary>
         private void UseItemFactory()
         {
             Debug.Log("=== Using ItemFactory ===");
@@ -112,7 +96,6 @@ namespace V2.Data.Examples
             // Add to the database
             _itemDB.AddItem("MiningDrill", drill);
             _itemDB.AddItem("Coal", coal);
-            
             
             Debug.Log("=== End of ItemFactory Demo ===");
         }

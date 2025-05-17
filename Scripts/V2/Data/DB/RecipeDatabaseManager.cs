@@ -4,9 +4,7 @@ using UnityEngine;
 
 namespace V2.Data
 {
-    /// <summary>
-    /// Manages saving and loading recipes to/from JSON files.
-    /// </summary>
+    
     public class RecipeDatabaseManager : MonoBehaviour
     {
         [SerializeField] private string _recipesFilePath = "Recipes/recipes.json";
@@ -32,9 +30,6 @@ namespace V2.Data
             LoadRecipesFromFile();
         }
         
-        /// <summary>
-        /// Save all recipes in the database to a JSON file.
-        /// </summary>
         public void SaveRecipesToFile()
         {
             RecipeCollection collection = new RecipeCollection();
@@ -69,9 +64,6 @@ namespace V2.Data
             Debug.Log($"Saved {collection.recipes.Count} recipes to {fullPath}");
         }
         
-        /// <summary>
-        /// Load recipes from a JSON file into the database.
-        /// </summary>
         public void LoadRecipesFromFile()
         {
             string fullPath = Path.Combine(Application.dataPath, _recipesFilePath);
@@ -110,18 +102,12 @@ namespace V2.Data
             }
         }
         
-        /// <summary>
-        /// Export recipes to a specific JSON file path.
-        /// </summary>
         public void ExportRecipes(string filePath)
         {
             _recipesFilePath = filePath;
             SaveRecipesToFile();
         }
         
-        /// <summary>
-        /// Import recipes from a specific JSON file path.
-        /// </summary>
         public void ImportRecipes(string filePath)
         {
             _recipesFilePath = filePath;

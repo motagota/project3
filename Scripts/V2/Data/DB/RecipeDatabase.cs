@@ -3,9 +3,7 @@ using UnityEngine;
 
 namespace V2.Data
 {
-    /// <summary>
-    /// A database class that stores and manages recipes for the simulation.
-    /// </summary>
+
     public class RecipeDatabase
     {
         private static RecipeDatabase _instance;
@@ -30,9 +28,6 @@ namespace V2.Data
             // Private constructor to enforce singleton pattern
         }
         
-        /// <summary>
-        /// Initialize the database with default recipes.
-        /// </summary>
         private void InitializeDefaultRecipes()
         {
             // Mining recipes (for Miner machines)
@@ -98,11 +93,6 @@ namespace V2.Data
             // Add more recipes as needed
         }
         
-        /// <summary>
-        /// Add a recipe to the database.
-        /// </summary>
-        /// <param name="recipeId">Unique identifier for the recipe</param>
-        /// <param name="recipe">The recipe to add</param>
         public void AddRecipe(string recipeId, Recipe recipe)
         {
             if (_recipes.ContainsKey(recipeId))
@@ -113,11 +103,6 @@ namespace V2.Data
             _recipes[recipeId] = recipe;
         }
         
-        /// <summary>
-        /// Get a recipe by its ID.
-        /// </summary>
-        /// <param name="recipeId">The ID of the recipe to retrieve</param>
-        /// <returns>The recipe if found, null otherwise</returns>
         public Recipe GetRecipe(string recipeId)
         {
             if (_recipes.TryGetValue(recipeId, out Recipe recipe))
@@ -129,11 +114,7 @@ namespace V2.Data
             return null;
         }
         
-        /// <summary>
-        /// Get all recipes that produce a specific output item type.
-        /// </summary>
-        /// <param name="outputItemType">The output item type to search for</param>
-        /// <returns>A list of recipes that produce the specified output</returns>
+  
         public List<Recipe> GetRecipesByOutput(string outputItemType)
         {
             List<Recipe> matchingRecipes = new List<Recipe>();
@@ -148,12 +129,7 @@ namespace V2.Data
             
             return matchingRecipes;
         }
-        
-        /// <summary>
-        /// Get all recipes that require a specific input item type.
-        /// </summary>
-        /// <param name="inputItemType">The input item type to search for</param>
-        /// <returns>A list of recipes that require the specified input</returns>
+   
         public List<Recipe> GetRecipesByInput(string inputItemType)
         {
             List<Recipe> matchingRecipes = new List<Recipe>();
@@ -169,27 +145,16 @@ namespace V2.Data
             return matchingRecipes;
         }
         
-        /// <summary>
-        /// Get all recipe IDs in the database.
-        /// </summary>
-        /// <returns>A list of all recipe IDs</returns>
         public List<string> GetAllRecipeIds()
         {
             return new List<string>(_recipes.Keys);
         }
         
-        /// <summary>
-        /// Get all recipes in the database.
-        /// </summary>
-        /// <returns>A list of all recipes</returns>
         public List<Recipe> GetAllRecipes()
         {
             return new List<Recipe>(_recipes.Values);
         }
-        
-        /// <summary>
-        /// Clear all recipes from the database.
-        /// </summary>
+     
         public void ClearRecipes()
         {
             _recipes.Clear();

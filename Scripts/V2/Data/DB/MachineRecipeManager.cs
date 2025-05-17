@@ -3,10 +3,7 @@ using System.Collections.Generic;
 
 namespace V2.Data
 {
-    /// <summary>
-    /// Manages the assignment of recipes to machines in the simulation.
-    /// Acts as a bridge between the RecipeDatabase and Machine instances.
-    /// </summary>
+ 
     public class MachineRecipeManager : MonoBehaviour
     {
         [SerializeField] private bool _initializeOnStart = true;
@@ -22,9 +19,6 @@ namespace V2.Data
             }
         }
         
-        /// <summary>
-        /// Find all machines in the scene and initialize them with recipes.
-        /// </summary>
         public void InitializeMachines()
         {
             // Find all machines in the scene
@@ -47,12 +41,6 @@ namespace V2.Data
             Debug.Log($"Initialized {machines.Length} machines with recipes");
         }
         
-        /// <summary>
-        /// Assign a recipe to a specific machine by recipe ID.
-        /// </summary>
-        /// <param name="machine">The machine to assign the recipe to</param>
-        /// <param name="recipeId">The ID of the recipe in the database</param>
-        /// <returns>True if assignment was successful, false otherwise</returns>
         public bool AssignRecipeToMachine(Machine machine, string recipeId)
         {
             if (machine == null)
@@ -75,11 +63,6 @@ namespace V2.Data
             return true;
         }
         
-        /// <summary>
-        /// Get the current recipe ID assigned to a machine.
-        /// </summary>
-        /// <param name="machine">The machine to check</param>
-        /// <returns>The recipe ID, or empty string if none assigned</returns>
         public string GetMachineRecipeId(Machine machine)
         {
             if (machine == null || !_machineRecipeAssignments.ContainsKey(machine))
@@ -90,11 +73,6 @@ namespace V2.Data
             return _machineRecipeAssignments[machine];
         }
         
-        /// <summary>
-        /// Find all machines using a specific recipe.
-        /// </summary>
-        /// <param name="recipeId">The recipe ID to search for</param>
-        /// <returns>A list of machines using the specified recipe</returns>
         public List<Machine> FindMachinesUsingRecipe(string recipeId)
         {
             List<Machine> result = new List<Machine>();
@@ -109,11 +87,7 @@ namespace V2.Data
             
             return result;
         }
-        
-        /// <summary>
-        /// Update all machines using a specific recipe when that recipe changes.
-        /// </summary>
-        /// <param name="recipeId">The ID of the recipe that changed</param>
+      
         public void UpdateMachinesUsingRecipe(string recipeId)
         {
             Recipe updatedRecipe = RecipeDatabase.Instance.GetRecipe(recipeId);
@@ -128,10 +102,6 @@ namespace V2.Data
             Debug.Log($"Updated {affectedMachines.Count} machines using recipe '{recipeId}'");
         }
         
-        /// <summary>
-        /// Clear the recipe assignment for a specific machine.
-        /// </summary>
-        /// <param name="machine">The machine to clear the recipe from</param>
         public void ClearMachineRecipe(Machine machine)
         {
             if (machine == null) return;

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 
 namespace V2.Data.Examples
 {
-    /// <summary>
-    /// Example demonstrating how to use the Miner class in a simulation.
-    /// </summary>
+   
     public class MinerUsageExample : MonoBehaviour
     {
         private List<Miner> _miners = new List<Miner>();
@@ -61,9 +59,8 @@ namespace V2.Data.Examples
                     // In a real implementation, you would add this item to an inventory or transport it
                 }
             }
-        }
-        
-        // Example of how to get information about a miner
+        }        
+
         public void DisplayMinerInfo(Miner miner)
         {
             string oreType = miner.GetOreType();

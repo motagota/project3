@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace V2.Data
 {
-    /// <summary>
-    /// A database class that stores and manages item definitions for the simulation.
-    /// </summary>
     public class ItemDatabase
     {
         private static ItemDatabase _instance;
@@ -30,9 +27,6 @@ namespace V2.Data
             // Private constructor to enforce singleton pattern
         }
         
-        /// <summary>
-        /// Initialize the database with default items.
-        /// </summary>
         private void InitializeDefaultItems()
         {
             // Raw materials
@@ -121,11 +115,6 @@ namespace V2.Data
             
         }
         
-        /// <summary>
-        /// Add an item to the database.
-        /// </summary>
-        /// <param name="itemId">Unique identifier for the item</param>
-        /// <param name="itemDefinition">The item definition to add</param>
         public void AddItem(string itemId, ItemDefinition itemDefinition)
         {
             if (_items.ContainsKey(itemId))
@@ -135,12 +124,7 @@ namespace V2.Data
             
             _items[itemId] = itemDefinition;
         }
-        
-        /// <summary>
-        /// Get an item definition by its ID.
-        /// </summary>
-        /// <param name="itemId">The ID of the item to retrieve</param>
-        /// <returns>The item definition if found, null otherwise</returns>
+       
         public ItemDefinition GetItem(string itemId)
         {
             if (_items.TryGetValue(itemId, out ItemDefinition item))
@@ -152,11 +136,6 @@ namespace V2.Data
             return null;
         }
         
-        /// <summary>
-        /// Get all items in a specific category.
-        /// </summary>
-        /// <param name="category">The category to filter by</param>
-        /// <returns>A list of items in the specified category</returns>
         public List<KeyValuePair<string, ItemDefinition>> GetItemsByCategory(string category)
         {
             List<KeyValuePair<string, ItemDefinition>> result = new List<KeyValuePair<string, ItemDefinition>>();
@@ -172,37 +151,21 @@ namespace V2.Data
             return result;
         }
         
-        /// <summary>
-        /// Check if an item with the specified ID exists in the database.
-        /// </summary>
-        /// <param name="itemId">The ID to check</param>
-        /// <returns>True if the item exists, false otherwise</returns>
         public bool HasItem(string itemId)
         {
             return _items.ContainsKey(itemId);
         }
         
-        /// <summary>
-        /// Get all item IDs in the database.
-        /// </summary>
-        /// <returns>A list of all item IDs</returns>
         public List<string> GetAllItemIds()
         {
             return new List<string>(_items.Keys);
         }
         
-        /// <summary>
-        /// Get all items in the database.
-        /// </summary>
-        /// <returns>A dictionary of all items</returns>
         public Dictionary<string, ItemDefinition> GetAllItems()
         {
             return new Dictionary<string, ItemDefinition>(_items);
         }
         
-        /// <summary>
-        /// Clear all items from the database.
-        /// </summary>
         public void ClearItems()
         {
             _items.Clear();
