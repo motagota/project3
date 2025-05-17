@@ -13,10 +13,10 @@ namespace V2.Data
         public event Action<Machine> OnEnabledStateChanged;
 
         public int CompletedRecipes { get; private set; } = 0;
-        private SimulationItem _outputItem;
+        private InventorySlot _outputSlot = new InventorySlot();
         private Dictionary<string, List<SimulationItem>> _inputItems = new Dictionary<string, List<SimulationItem>>();
         
-        public bool HasItem => _outputItem != null;
+        public bool HasItem => !_outputSlot.IsEmpty;
         
         private bool _isEnabled = true;
         public bool IsEnabled
@@ -43,8 +43,7 @@ namespace V2.Data
         public override void Tick(float dt)
         {
             base.Tick(dt);
-            
-            // Skip processing if machine is disabled
+           
             if (!IsEnabled)
                 return;
         
@@ -58,7 +57,8 @@ namespace V2.Data
                 }
             }
             
-            if (_outputItem == null)
+            // Only produce if the output slot can accept more items
+            if (!_outputSlot.IsFull)
             {
                 if (HasRequiredInputItems())
                 {
@@ -67,9 +67,18 @@ namespace V2.Data
                     {
                         Progress = 0;
                         CompletedRecipes++;
-                        _outputItem = new SimulationItem("1",CurrentRecipe.OutputItemType);
-                        OnRecipeCompleted?.Invoke(this);
-                        Debug.Log("Machine finished and produced: " + _outputItem);
+                        SimulationItem newItem = new SimulationItem("1", CurrentRecipe.OutputItemType);
+                        
+                        // Add the item to the output slot
+                        if (_outputSlot.AddItem(newItem, ItemDatabase.Instance))
+                        {
+                            OnRecipeCompleted?.Invoke(this);
+                            Debug.Log("Machine finished and produced: " + newItem);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Machine could not add produced item to output slot");
+                        }
                     }
                 }
             }
@@ -112,12 +121,7 @@ namespace V2.Data
         
         public SimulationItem TakeItem()
         {
-            if (_outputItem == null)
-                return null;
-                
-            SimulationItem item = _outputItem;
-            _outputItem = null;
-            return item;
+            return _outputSlot.TakeItem();
         }
         
         public virtual bool CanAcceptItem(SimulationItem item)
