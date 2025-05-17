@@ -35,6 +35,42 @@ namespace V2.Data
         /// </summary>
         private void InitializeDefaultRecipes()
         {
+            // Mining recipes (for Miner machines)
+            AddRecipe("Mine_IronOre", new Recipe(
+                duration: 3.0f,
+                outputItemType: "IronOre",
+                inputItemTypes: new List<string>(),
+                inputItemCount: 0
+            ));
+            
+            AddRecipe("Mine_CopperOre", new Recipe(
+                duration: 3.0f,
+                outputItemType: "CopperOre",
+                inputItemTypes: new List<string>(),
+                inputItemCount: 0
+            ));
+            
+            AddRecipe("Mine_GoldOre", new Recipe(
+                duration: 5.0f, // Gold takes longer to mine
+                outputItemType: "GoldOre",
+                inputItemTypes: new List<string>(),
+                inputItemCount: 0
+            ));
+            
+            AddRecipe("Mine_CoalOre", new Recipe(
+                duration: 2.0f, // Coal is faster to mine
+                outputItemType: "CoalOre",
+                inputItemTypes: new List<string>(),
+                inputItemCount: 0
+            ));
+            
+            AddRecipe("Mine_StoneOre", new Recipe(
+                duration: 1.5f, // Stone is the fastest to mine
+                outputItemType: "StoneOre",
+                inputItemTypes: new List<string>(),
+                inputItemCount: 0
+            ));
+            
             // Basic processing recipe
             AddRecipe("IronOre_to_IronPlate", new Recipe(
                 duration: 2.0f,

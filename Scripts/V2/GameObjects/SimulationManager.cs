@@ -40,11 +40,6 @@ public class SimulationManagerV2 : MonoBehaviour
         GetChunk(new Vector2Int(0, 0));
  
     }
-    private void Awake()
-    {
-        
-    }
-
     private void InitaliseChunk(ChunkData newChunk)
     {
         
@@ -58,6 +53,12 @@ public class SimulationManagerV2 : MonoBehaviour
 
         newChunk.OnBeltAdded += OnBeltAdded;
         newChunk.OnBeltRemoved += OnBeltRemoved;
+        
+        // Create a miner at the start of the first belt line (5,6)
+        createNewMiner(newChunk, new Vector2Int(4, 6), "IronOre");
+        // Create a connector to connect the miner to the belt
+        Connector minerConnector1 = createNewConnector(newChunk, new Vector2Int(4, 5));
+        minerConnector1.Rotate(newChunk);
         
         createNewBelt(newChunk,new Vector2Int(5, 6));
         createNewBelt(newChunk,new Vector2Int(6, 6));
@@ -94,6 +95,12 @@ public class SimulationManagerV2 : MonoBehaviour
         createNewMachine(newChunk,new Vector2Int(7, 12));
         createNewMachine(newChunk,new Vector2Int(8, 12));
         createNewMachine(newChunk,new Vector2Int(9, 12));
+        
+        // Create a miner at the start of the second belt line (5,14)
+        createNewMiner(newChunk, new Vector2Int(4, 14), "CopperOre");
+        // Create a connector to connect the miner to the belt
+        Connector minerConnector2 = createNewConnector(newChunk, new Vector2Int(4, 13));
+        minerConnector2.Rotate(newChunk);
         
         createNewBelt(newChunk,new Vector2Int(5, 14));
         createNewBelt(newChunk,new Vector2Int(6, 14));
@@ -203,6 +210,14 @@ public class SimulationManagerV2 : MonoBehaviour
         if (recipe != null) machine.CurrentRecipe = recipe;
         chunk.AddMachine(machine);
         machine.OnRecipeCompleted += OnMachineCompletedRecipe;
+    }
+    
+    public Miner createNewMiner(ChunkData chunk, Vector2Int coords, string oreType = "IronOre")
+    {
+        var miner = MinerFactory.CreateMiner(coords, oreType);
+        chunk.AddMachine(miner);
+        miner.OnRecipeCompleted += OnMachineCompletedRecipe;
+        return miner;
     }
 
     

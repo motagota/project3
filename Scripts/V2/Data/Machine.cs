@@ -10,12 +10,27 @@ namespace V2.Data
         public float Progress;
         public event Action<Machine> OnRecipeCompleted;
         public event Action<Machine, SimulationItem> OnItemConsumed;
+        public event Action<Machine> OnEnabledStateChanged;
 
         public int CompletedRecipes { get; private set; } = 0;
         private SimulationItem _outputItem;
         private Dictionary<string, List<SimulationItem>> _inputItems = new Dictionary<string, List<SimulationItem>>();
         
         public bool HasItem => _outputItem != null;
+        
+        private bool _isEnabled = true;
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set 
+            { 
+                if (_isEnabled != value)
+                {
+                    _isEnabled = value;
+                    OnEnabledStateChanged?.Invoke(this);
+                }
+            }
+        }
         
         private float _consumptionTimer = 0f;
         private const float CONSUMPTION_RATE = 1f / 3f; 
@@ -28,6 +43,10 @@ namespace V2.Data
         public override void Tick(float dt)
         {
             base.Tick(dt);
+            
+            // Skip processing if machine is disabled
+            if (!IsEnabled)
+                return;
         
             if (CurrentRecipe.InputItemCount > 0)
             {

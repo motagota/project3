@@ -54,6 +54,33 @@ namespace V2.Data
                 maxStackSize: 50
             ));
             
+            AddItem("GoldOre", new ItemDefinition(
+                id: "7",
+                displayName: "Gold Ore",
+                description: "Precious gold ore extracted from deep mines.",
+                category: "RawMaterial",
+                stackable: true,
+                maxStackSize: 50
+            ));
+            
+            AddItem("CoalOre", new ItemDefinition(
+                id: "8",
+                displayName: "Coal Ore",
+                description: "Combustible coal ore used for fuel and processing.",
+                category: "RawMaterial",
+                stackable: true,
+                maxStackSize: 50
+            ));
+            
+            AddItem("StoneOre", new ItemDefinition(
+                id: "9",
+                displayName: "Stone",
+                description: "Basic stone material used for construction.",
+                category: "RawMaterial",
+                stackable: true,
+                maxStackSize: 100
+            ));
+            
             // Processed materials
             AddItem("IronPlate", new ItemDefinition(
                 id: "3",

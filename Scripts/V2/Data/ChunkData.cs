@@ -99,6 +99,18 @@ namespace V2.Data
         {
             yield break;
         }
+        
+        public Machine GetMachineAt(Vector2Int position)
+        {
+            foreach (var machine in _machines)
+            {
+                if (machine.LocalPostion == position)
+                {
+                    return machine;
+                }
+            }
+            return null;
+        }
 
         public List<Machine> GetMachines()
         {
@@ -115,19 +127,7 @@ namespace V2.Data
             return _belts;
         }
 
-        public Machine GetMachineAt(Vector2Int pos)
-        {
-            foreach (var m in _machines)
-            {
-                if (m.LocalPostion == pos)
-                {
-                    return m;
-                }
-            }
-
-            return null;
-        }
-        
+      
         public BeltData GetBeltAt(Vector2Int pos)
         {
             foreach (var b in _belts) 
