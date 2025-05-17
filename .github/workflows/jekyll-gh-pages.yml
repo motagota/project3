@@ -28,11 +28,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      # Copy README files to docs directory
+      # Debug step to see repository structure
+      - name: Debug - List repository structure
+        run: find . -type f -name "README_*.md" | sort
+        
+      # Copy README files to docs directory with corrected path
       - name: Prepare documentation files
         run: |
           mkdir -p docs/data-system
-          cp -f Assets/Scripts/V2/Data/DB/README_*.md docs/data-system/
+          # Try multiple possible paths to find the files
+          if [ -d "Assets/Scripts/V2/Data/DB" ]; then
+            cp -f Assets/Scripts/V2/Data/DB/README_*.md docs/data-system/ || echo "Files not found in Assets/Scripts/V2/Data/DB"
+          elif [ -d "assets/scripts/v2/data/db" ]; then
+            cp -f assets/scripts/v2/data/db/README_*.md docs/data-system/ || echo "Files not found in lowercase path"
+          else
+            echo "Searching for README files..."
+            find . -name "README_*.md" -exec cp {} docs/data-system/ \; || echo "No README files found"
+          fi
+          ls -la docs/data-system/
           
       # Setup and build with Jekyll
       - name: Setup Pages
