@@ -5,7 +5,7 @@
           {
             "files": ["**/*.cs"],
             "exclude": ["**/bin/**", "**/obj/**"],
-            "src": "./Assets/Scripts"
+            "src": "./Scripts/V2/"
           }
         ],
         "dest": "api"
