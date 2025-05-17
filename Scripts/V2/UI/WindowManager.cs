@@ -19,7 +19,7 @@ namespace V2.UI
         
         [Header("Default Settings")]
         [SerializeField] private Vector2 defaultWindowSize = new Vector2(300, 400);
-        [SerializeField] private Color defaultWindowColor = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+        [SerializeField] private Color defaultWindowColor = new Color(0.1f, 0.1f, 0.15f, 0.95f);
         [SerializeField] private int defaultFontSize = 14;
         
         private Dictionary<string, GameObject> _activeWindows = new Dictionary<string, GameObject>();
@@ -175,6 +175,14 @@ namespace V2.UI
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
             
+            // Add decorative header
+            GameObject headerDecoration = new GameObject("HeaderDecoration");
+            headerDecoration.transform.SetParent(contentArea, false);
+            RectTransform headerRect = headerDecoration.AddComponent<RectTransform>();
+            headerRect.sizeDelta = new Vector2(0, 4);
+            Image headerImage = headerDecoration.AddComponent<Image>();
+            headerImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
+            
             // Create recipe name text
             TextMeshProUGUI recipeNameText = CreateTextElement(contentArea, "RecipeNameText", "Recipe: ");
             machineUI.recipeNameText = recipeNameText;
@@ -198,6 +206,14 @@ namespace V2.UI
             // Create enabled toggle
             Toggle enabledToggle = CreateToggle(contentArea, "EnabledToggle", "Enabled");
             machineUI.enabledToggle = enabledToggle;
+            
+            // Add decorative footer
+            GameObject footerDecoration = new GameObject("FooterDecoration");
+            footerDecoration.transform.SetParent(contentArea, false);
+            RectTransform footerRect = footerDecoration.AddComponent<RectTransform>();
+            footerRect.sizeDelta = new Vector2(0, 4);
+            Image footerImage = footerDecoration.AddComponent<Image>();
+            footerImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
             
             // Set the UI panel reference
             machineUI.uiPanel = contentArea.parent.gameObject;
@@ -223,6 +239,13 @@ namespace V2.UI
             textComponent.fontSize = defaultFontSize;
             textComponent.alignment = TextAlignmentOptions.Left;
             textComponent.enableWordWrapping = true;
+            textComponent.enableVertexGradient = true;
+            textComponent.colorGradient = new VertexGradient(
+                new Color(0.0f, 0.9f, 0.9f, 1f), // Cyan top-left
+                new Color(0.0f, 0.8f, 0.9f, 1f), // Cyan top-right
+                new Color(0.0f, 0.7f, 0.8f, 1f), // Darker cyan bottom-left
+                new Color(0.0f, 0.6f, 0.7f, 1f)  // Darker cyan bottom-right
+            );
             
             return textComponent;
         }
@@ -255,7 +278,7 @@ namespace V2.UI
             backgroundRect.anchorMax = new Vector2(1, 1);
             backgroundRect.sizeDelta = Vector2.zero;
             Image backgroundImage = background.AddComponent<Image>();
-            backgroundImage.color = new Color(0.1f, 0.1f, 0.1f, 1f);
+            backgroundImage.color = new Color(0.15f, 0.15f, 0.2f, 1f);
             
             // Create fill area
             GameObject fillArea = new GameObject("Fill Area");
@@ -274,7 +297,7 @@ namespace V2.UI
             fillRect.anchorMax = new Vector2(1, 1);
             fillRect.sizeDelta = Vector2.zero;
             Image fillImage = fill.AddComponent<Image>();
-            fillImage.color = new Color(0.2f, 0.7f, 0.2f, 1f);
+            fillImage.color = new Color(0.0f, 0.9f, 0.8f, 1f); // Bright cyan
             
             slider.fillRect = fillRect;
             
@@ -320,7 +343,7 @@ namespace V2.UI
             backgroundRect.anchorMax = new Vector2(1, 1);
             backgroundRect.sizeDelta = Vector2.zero;
             Image backgroundImage = background.AddComponent<Image>();
-            backgroundImage.color = Color.white;
+            backgroundImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
             
             // Create checkmark
             GameObject checkmark = new GameObject("Checkmark");
@@ -330,7 +353,7 @@ namespace V2.UI
             checkmarkRect.anchorMax = new Vector2(0.9f, 0.9f);
             checkmarkRect.sizeDelta = Vector2.zero;
             Image checkmarkImage = checkmark.AddComponent<Image>();
-            checkmarkImage.color = new Color(0.2f, 0.7f, 0.2f, 1f);
+            checkmarkImage.color = new Color(0.0f, 0.9f, 0.8f, 1f); // Bright cyan
             
             toggle.graphic = checkmarkImage;
             toggle.targetGraphic = backgroundImage;
@@ -345,6 +368,13 @@ namespace V2.UI
             labelText.text = label;
             labelText.fontSize = defaultFontSize;
             labelText.alignment = TextAlignmentOptions.Left;
+            labelText.enableVertexGradient = true;
+            labelText.colorGradient = new VertexGradient(
+                new Color(0.0f, 0.9f, 0.9f, 1f), // Cyan top-left
+                new Color(0.0f, 0.8f, 0.9f, 1f), // Cyan top-right
+                new Color(0.0f, 0.7f, 0.8f, 1f), // Darker cyan bottom-left
+                new Color(0.0f, 0.6f, 0.7f, 1f)  // Darker cyan bottom-right
+            );
             
             return toggle;
         }
@@ -396,6 +426,20 @@ namespace V2.UI
             Image windowImage = windowObject.AddComponent<Image>();
             windowImage.color = defaultWindowColor;
             
+            // Add glow effect around window
+            GameObject glow = new GameObject("Glow");
+            glow.transform.SetParent(windowObject.transform, false);
+            RectTransform glowRect = glow.AddComponent<RectTransform>();
+            glowRect.anchorMin = Vector2.zero;
+            glowRect.anchorMax = Vector2.one;
+            glowRect.sizeDelta = new Vector2(10, 10); // Slightly larger than the window
+            glowRect.anchoredPosition = Vector2.zero;
+            Image glowImage = glow.AddComponent<Image>();
+            glowImage.color = new Color(0.0f, 0.9f, 0.8f, 0.3f); // Cyan glow
+            glowImage.sprite = null; // You would need to assign a glow sprite here
+            glowImage.type = Image.Type.Sliced;
+            glow.transform.SetAsFirstSibling(); // Put glow behind everything
+            
             // Create title bar
             GameObject titleBar = new GameObject("TitleBar");
             titleBar.transform.SetParent(windowObject.transform, false);
@@ -407,10 +451,23 @@ namespace V2.UI
             
             // Add title bar background
             Image titleImage = titleBar.AddComponent<Image>();
-            titleImage.color = new Color(0.1f, 0.1f, 0.1f, 1f);
+            titleImage.color = new Color(0.5f, 0.3f, 0.1f, 1f); // Brass/copper color
             
             // Add drag functionality
             DragHandler dragHandler = titleBar.AddComponent<DragHandler>();
+            
+            // Add gear decoration to title bar
+            GameObject gearDecoration = new GameObject("GearDecoration");
+            gearDecoration.transform.SetParent(titleBar.transform, false);
+            RectTransform gearRect = gearDecoration.AddComponent<RectTransform>();
+            gearRect.anchorMin = new Vector2(0, 0.5f);
+            gearRect.anchorMax = new Vector2(0, 0.5f);
+            gearRect.pivot = new Vector2(0, 0.5f);
+            gearRect.sizeDelta = new Vector2(30, 30);
+            gearRect.anchoredPosition = new Vector2(5, 0);
+            Image gearImage = gearDecoration.AddComponent<Image>();
+            gearImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
+            gearImage.sprite = null; // You would need to assign a gear sprite here
             
             // Create title text
             GameObject titleText = new GameObject("TitleText");
@@ -418,7 +475,7 @@ namespace V2.UI
             RectTransform titleTextRect = titleText.AddComponent<RectTransform>();
             titleTextRect.anchorMin = new Vector2(0, 0);
             titleTextRect.anchorMax = new Vector2(1, 1);
-            titleTextRect.offsetMin = new Vector2(10, 0);
+            titleTextRect.offsetMin = new Vector2(40, 0); // Adjusted for gear decoration
             titleTextRect.offsetMax = new Vector2(-40, 0);
             
             TextMeshProUGUI titleTextComponent = titleText.AddComponent<TextMeshProUGUI>();
@@ -427,13 +484,13 @@ namespace V2.UI
             titleTextComponent.alignment = TextAlignmentOptions.Left;
             titleTextComponent.enableVertexGradient = true;
             titleTextComponent.colorGradient = new VertexGradient(
-                new Color(0.8f, 0.8f, 0.8f, 1f),
-                new Color(0.8f, 0.8f, 0.8f, 1f),
-                new Color(0.6f, 0.6f, 0.6f, 1f),
-                new Color(0.6f, 0.6f, 0.6f, 1f)
+                new Color(0.0f, 0.9f, 0.9f, 1f), // Cyan top-left
+                new Color(0.0f, 0.8f, 0.9f, 1f), // Cyan top-right
+                new Color(0.0f, 0.7f, 0.8f, 1f), // Darker cyan bottom-left
+                new Color(0.0f, 0.6f, 0.7f, 1f)  // Darker cyan bottom-right
             );
             
-            // Create close button
+            // Add close button
             GameObject closeButton = new GameObject("CloseButton");
             closeButton.transform.SetParent(titleBar.transform, false);
             RectTransform closeButtonRect = closeButton.AddComponent<RectTransform>();
@@ -444,12 +501,13 @@ namespace V2.UI
             closeButtonRect.sizeDelta = new Vector2(30, 30);
             
             Image closeButtonImage = closeButton.AddComponent<Image>();
-            closeButtonImage.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+            closeButtonImage.color = new Color(0.9f, 0.2f, 0.3f, 1f); // Bright red with neon tint
             
             Button closeButtonComponent = closeButton.AddComponent<Button>();
             closeButtonComponent.targetGraphic = closeButtonImage;
             ColorBlock colors = closeButtonComponent.colors;
-            colors.highlightedColor = new Color(1f, 0.3f, 0.3f, 1f);
+            colors.highlightedColor = new Color(1f, 0.4f, 0.5f, 1f); // Brighter highlight
+            colors.pressedColor = new Color(0.7f, 0.1f, 0.2f, 1f); // Darker when pressed
             closeButtonComponent.colors = colors;
             
             // Create content area
@@ -463,7 +521,21 @@ namespace V2.UI
             
             // Add content background
             Image contentImage = content.AddComponent<Image>();
-            contentImage.color = new Color(0.15f, 0.15f, 0.15f, 0.9f);
+            contentImage.color = new Color(0.1f, 0.1f, 0.15f, 0.9f); // Dark blue-black
+            
+            // Add decorative border
+            GameObject border = new GameObject("Border");
+            border.transform.SetParent(windowObject.transform, false);
+            RectTransform borderRect = border.AddComponent<RectTransform>();
+            borderRect.anchorMin = Vector2.zero;
+            borderRect.anchorMax = Vector2.one;
+            borderRect.sizeDelta = Vector2.zero;
+            Image borderImage = border.AddComponent<Image>();
+            borderImage.color = new Color(0.6f, 0.4f, 0.2f, 0.5f); // Brass/copper color
+            borderImage.sprite = null; // You would need to assign a border sprite here
+            borderImage.type = Image.Type.Sliced;
+            borderImage.fillCenter = false;
+            border.transform.SetAsFirstSibling(); // Put border behind everything
             
             return windowObject;
         }
