@@ -56,10 +56,23 @@ public class SimulationManagerV2 : MonoBehaviour
         
         // Create a miner at the start of the first belt line (5,6)
         createNewMiner(newChunk, new Vector2Int(4, 6), "IronOre");
+
+        // lay down 20 belts
+        BeltData belt = null;
+        for (int i = 4; i < 16; i++)
+        {
+            belt = createNewBelt(newChunk, new Vector2Int(i, 4));
+            belt.Rotate(newChunk);
+            
+        }
+
         // Create a connector to connect the miner to the belt
-      /*    Connector minerConnector1 = createNewConnector(newChunk, new Vector2Int(4, 5));
+         Connector minerConnector1 = createNewConnector(newChunk, new Vector2Int(4, 5));
         minerConnector1.Rotate(newChunk);
-      
+        minerConnector1.Rotate(newChunk);
+        minerConnector1.Rotate(newChunk);
+        
+      /* 
         createNewBelt(newChunk,new Vector2Int(5, 6));
         createNewBelt(newChunk,new Vector2Int(6, 6));
         createNewBelt(newChunk,new Vector2Int(7, 6));
@@ -183,16 +196,16 @@ public class SimulationManagerV2 : MonoBehaviour
 
         createNewMachine(newChunk,new Vector2Int(11, 12), consumptionRecipe);
         
-        foreach (var belt in newChunk.GetBelts())
-        {
-            belt.CheckConnections(newChunk);
-        }
+       
         
         tmpConnector = createNewConnector(newChunk,new Vector2Int(11, 11));
         tmpConnector.Rotate(newChunk);
         
         */
-
+        foreach (var b in newChunk.GetBelts())
+        {
+            b.CheckConnections(newChunk);
+        }
         MarkChunkDirty(newChunk.Coords);
     }
 

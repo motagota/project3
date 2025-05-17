@@ -120,18 +120,12 @@ namespace V2.GameObjects
         {
             if (belt == _beltData && _itemObjects.TryGetValue(item, out GameObject itemObject))
             {
-                BeltData nextBelt = _beltData.GetNextBelt();
-                BeltRenderer nextRenderer = FindNextBeltRenderer(nextBelt);
+                // Always destroy the GameObject when an item is removed from this belt
+                Destroy(itemObject);
+                _itemObjects.Remove(item);
                 
-                if (nextRenderer != null)
-                {
-                    _itemObjects.Remove(item);
-                }
-                else
-                {
-                    Destroy(itemObject);
-                    _itemObjects.Remove(item);
-                }
+                // The next belt will create its own GameObject for the item when it receives it
+                // through its OnItemAdded event
             }
         }
         

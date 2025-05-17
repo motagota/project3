@@ -162,5 +162,17 @@ namespace V2.Data
             }
             return null;
         }
+        
+        public Connector GetConnectorAt(Vector2Int position)
+        {
+            foreach (var connector in _connectors)
+            {
+                if (connector.LocalPosition == position)
+                {
+                    return connector;
+                }
+            }
+            return null;
+        }
     }
 }

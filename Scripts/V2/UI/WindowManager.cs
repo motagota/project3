@@ -7,11 +7,7 @@ using V2.Data;
 
 namespace V2.UI
 {
-    /// <summary>
-    /// WindowManager handles the creation and management of UI windows in the game.
-    /// It provides a centralized system for generating UI elements procedurally.
-    /// </summary>
-    public class WindowManager : MonoBehaviour
+   public class WindowManager : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private Canvas mainCanvas;
@@ -69,14 +65,7 @@ namespace V2.UI
                 windowPrefab = CreateDefaultWindowPrefab();
             }
         }
-        
-        /// <summary>
-        /// Creates a new UI window with the specified ID and title.
-        /// </summary>
-        /// <param name="windowId">Unique identifier for the window</param>
-        /// <param name="title">Title to display on the window</param>
-        /// <param name="position">Screen position for the window</param>
-        /// <returns>The RectTransform of the window content area</returns>
+       
         public RectTransform CreateWindow(string windowId, string title, Vector2 position = default)
         {
             // Check if window already exists
@@ -120,12 +109,7 @@ namespace V2.UI
             // Return content area for further customization
             return windowObject.transform.Find("Content").GetComponent<RectTransform>();
         }
-        
-        /// <summary>
-        /// Creates a machine UI window for the specified machine.
-        /// </summary>
-        /// <param name="machine">The machine to create UI for</param>
-        /// <returns>The MachineUI component attached to the window</returns>
+       
         public MachineUI CreateMachineWindow(Machine machine)
         {
             // Use the helper method to get a consistent window ID
@@ -150,6 +134,63 @@ namespace V2.UI
             machineUI.SelectMachine(machine);
             
             return machineUI;
+        }
+        
+        public ConnectorUI CreateConnectorWindow(Connector connector)
+        {
+            // Create a consistent window ID based on the connector's ID
+            string windowId = "Connector_" + connector.ID;
+            string title = "Connector";
+            
+            // Create base window
+            RectTransform contentArea = CreateWindow(windowId, title);
+            GameObject windowObject = contentArea.transform.parent.gameObject;
+            
+            // Add ConnectorUI component if it doesn't exist
+            ConnectorUI connectorUI = windowObject.GetComponent<ConnectorUI>();
+            if (connectorUI == null)
+            {
+                connectorUI = windowObject.AddComponent<ConnectorUI>();
+            }
+            
+            // Create UI elements for connector
+            CreateConnectorUIElements(contentArea, connectorUI);
+            
+            // Initialize the UI with the connector
+            connectorUI.SelectConnector(connector);
+            
+            return connectorUI;
+        }
+        
+        /// <summary>
+        /// Creates a belt UI window for the specified belt.
+        /// </summary>
+        /// <param name="belt">The belt to create UI for</param>
+        /// <returns>The BeltUI component attached to the window</returns>
+        public BeltUI CreateBeltWindow(BeltData belt)
+        {
+            // Create a consistent window ID based on the belt's ID
+            string windowId = "Belt_" + belt.ID;
+            string title = "Belt";
+            
+            // Create base window
+            RectTransform contentArea = CreateWindow(windowId, title);
+            GameObject windowObject = contentArea.transform.parent.gameObject;
+            
+            // Add BeltUI component if it doesn't exist
+            BeltUI beltUI = windowObject.GetComponent<BeltUI>();
+            if (beltUI == null)
+            {
+                beltUI = windowObject.AddComponent<BeltUI>();
+            }
+            
+            // Create UI elements for belt
+            CreateBeltUIElements(contentArea, beltUI);
+            
+            // Initialize the UI with the belt
+            beltUI.SelectBelt(belt);
+            
+            return beltUI;
         }
         
         /// <summary>
@@ -217,6 +258,141 @@ namespace V2.UI
             
             // Set the UI panel reference
             machineUI.uiPanel = contentArea.parent.gameObject;
+        }
+        
+        /// <summary>
+        /// Creates the UI elements for a connector window.
+        /// </summary>
+        /// <param name="contentArea">The content area to add elements to</param>
+        /// <param name="connectorUI">The ConnectorUI component to reference</param>
+        private void CreateConnectorUIElements(RectTransform contentArea, ConnectorUI connectorUI)
+        {
+            // Clear existing content
+            foreach (Transform child in contentArea)
+            {
+                Destroy(child.gameObject);
+            }
+            
+            // Create vertical layout group
+            VerticalLayoutGroup layoutGroup = contentArea.gameObject.AddComponent<VerticalLayoutGroup>();
+            layoutGroup.padding = new RectOffset(10, 10, 10, 10);
+            layoutGroup.spacing = 10;
+            layoutGroup.childAlignment = TextAnchor.UpperCenter;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = false;
+            layoutGroup.childForceExpandWidth = true;
+            layoutGroup.childForceExpandHeight = false;
+            
+            // Add decorative header
+            GameObject headerDecoration = new GameObject("HeaderDecoration");
+            headerDecoration.transform.SetParent(contentArea, false);
+            RectTransform headerRect = headerDecoration.AddComponent<RectTransform>();
+            headerRect.sizeDelta = new Vector2(0, 4);
+            Image headerImage = headerDecoration.AddComponent<Image>();
+            headerImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
+            
+            // Create input connection text
+            TextMeshProUGUI inputConnectionText = CreateTextElement(contentArea, "InputConnectionText", "Input Connection: None");
+            connectorUI.inputConnectionText = inputConnectionText;
+            
+            // Create output connection text
+            TextMeshProUGUI outputConnectionText = CreateTextElement(contentArea, "OutputConnectionText", "Output Connection: None");
+            connectorUI.outputConnectionText = outputConnectionText;
+            
+            // Create held item text
+            TextMeshProUGUI heldItemText = CreateTextElement(contentArea, "HeldItemText", "Held Item: None");
+            connectorUI.heldItemText = heldItemText;
+            
+            // Create status text
+            TextMeshProUGUI statusText = CreateTextElement(contentArea, "StatusText", "Status: Waiting for Input");
+            connectorUI.statusText = statusText;
+            
+            // Add decorative footer
+            GameObject footerDecoration = new GameObject("FooterDecoration");
+            footerDecoration.transform.SetParent(contentArea, false);
+            RectTransform footerRect = footerDecoration.AddComponent<RectTransform>();
+            footerRect.sizeDelta = new Vector2(0, 4);
+            Image footerImage = footerDecoration.AddComponent<Image>();
+            footerImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
+            
+            // Set the UI panel reference
+            connectorUI.uiPanel = contentArea.parent.gameObject;
+        }
+        
+        /// <summary>
+        /// Creates the UI elements for a belt window.
+        /// </summary>
+        /// <param name="contentArea">The content area to add elements to</param>
+        /// <param name="beltUI">The BeltUI component to reference</param>
+        private void CreateBeltUIElements(RectTransform contentArea, BeltUI beltUI)
+        {
+            // Clear existing content
+            foreach (Transform child in contentArea)
+            {
+                Destroy(child.gameObject);
+            }
+            
+            // Create vertical layout group
+            VerticalLayoutGroup layoutGroup = contentArea.gameObject.AddComponent<VerticalLayoutGroup>();
+            layoutGroup.padding = new RectOffset(10, 10, 10, 10);
+            layoutGroup.spacing = 10;
+            layoutGroup.childAlignment = TextAnchor.UpperCenter;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = false;
+            layoutGroup.childForceExpandWidth = true;
+            layoutGroup.childForceExpandHeight = false;
+            
+            // Add decorative header
+            GameObject headerDecoration = new GameObject("HeaderDecoration");
+            headerDecoration.transform.SetParent(contentArea, false);
+            RectTransform headerRect = headerDecoration.AddComponent<RectTransform>();
+            headerRect.sizeDelta = new Vector2(0, 4);
+            Image headerImage = headerDecoration.AddComponent<Image>();
+            headerImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
+            
+            // Create next belt text
+            TextMeshProUGUI nextBeltText = CreateTextElement(contentArea, "NextBeltText", "Next Belt: None");
+            beltUI.nextBeltText = nextBeltText;
+            
+            // Create previous belt text
+            TextMeshProUGUI previousBeltText = CreateTextElement(contentArea, "PreviousBeltText", "Previous Belt: None");
+            beltUI.previousBeltText = previousBeltText;
+            
+            // Create items count text
+            TextMeshProUGUI itemsCountText = CreateTextElement(contentArea, "ItemsCountText", "Items: 0");
+            beltUI.itemsCountText = itemsCountText;
+            
+            // Create items list text with more height for multiple items
+            GameObject itemsListObject = new GameObject("ItemsListText");
+            itemsListObject.transform.SetParent(contentArea, false);
+            
+            RectTransform itemsListRect = itemsListObject.AddComponent<RectTransform>();
+            itemsListRect.sizeDelta = new Vector2(0, 100); // Taller to show multiple items
+            
+            TextMeshProUGUI itemsListText = itemsListObject.AddComponent<TextMeshProUGUI>();
+            itemsListText.text = "No items on belt";
+            itemsListText.fontSize = defaultFontSize;
+            itemsListText.alignment = TextAlignmentOptions.Left;
+            itemsListText.enableWordWrapping = true;
+            itemsListText.enableVertexGradient = true;
+            itemsListText.colorGradient = new VertexGradient(
+                new Color(0.0f, 0.9f, 0.9f, 1f), // Cyan top-left
+                new Color(0.0f, 0.8f, 0.9f, 1f), // Cyan top-right
+                new Color(0.0f, 0.7f, 0.8f, 1f), // Darker cyan bottom-left
+                new Color(0.0f, 0.6f, 0.7f, 1f)  // Darker cyan bottom-right
+            );
+            beltUI.itemsListText = itemsListText;
+            
+            // Add decorative footer
+            GameObject footerDecoration = new GameObject("FooterDecoration");
+            footerDecoration.transform.SetParent(contentArea, false);
+            RectTransform footerRect = footerDecoration.AddComponent<RectTransform>();
+            footerRect.sizeDelta = new Vector2(0, 4);
+            Image footerImage = footerDecoration.AddComponent<Image>();
+            footerImage.color = new Color(0.6f, 0.4f, 0.2f, 1f); // Brass/copper color
+            
+            // Set the UI panel reference
+            beltUI.uiPanel = contentArea.parent.gameObject;
         }
         
         /// <summary>
