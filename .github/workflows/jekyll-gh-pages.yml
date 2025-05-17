@@ -33,10 +33,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           
-      # Generate XML documentation files from C# code
-      - name: Build project to generate XML docs
+      # Generate XML documentation files directly from C# files
+      - name: Generate XML docs with DocFX
         run: |
-          dotnet build "My project (3).sln" /p:GenerateDocumentationFile=true
+          dotnet tool install -g docfx
+          docfx metadata docfx.json
           
       # Install and run a tool to convert XML to Markdown
       - name: Install xmldoc2md
@@ -45,7 +46,8 @@ jobs:
       - name: Convert XML docs to Markdown
         run: |
           mkdir -p docs/api
-          xmldoc2md --output docs/api ./obj/Debug/*/My*.xml
+          find . -name "*.xml" -path "*/api/*" -exec cp {} ./temp_xml/ \;
+          xmldoc2md --output docs/api ./temp_xml/*.xml
           
       # Setup and build with Jekyll
       - name: Setup Pages
