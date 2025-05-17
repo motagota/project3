@@ -1,0 +1,24 @@
+# Jekyll configuration
+title: My Unity Project Documentation
+description: API documentation generated from code comments
+
+# Build settings
+markdown: kramdown
+theme: minima
+
+# Include generated API docs
+include:
+  - docs/api
+
+# Exclude files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .idea
+  - .git
+  - Scripts
+  - Scenes
+  - prefabs
+  - Shaders

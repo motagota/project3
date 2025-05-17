@@ -1,5 +1,5 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+# Workflow for building and deploying documentation from XML comments to GitHub Pages
+name: Deploy Code Documentation with Jekyll
 
 on:
   # Runs on pushes targeting the default branch
@@ -15,8 +15,7 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -28,13 +27,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+          
+      # Generate XML documentation files from C# code
+      - name: Build project to generate XML docs
+        run: |
+          dotnet build "My project (3).sln" /p:GenerateDocumentationFile=true
+          
+      # Install and run a tool to convert XML to Markdown
+      - name: Install xmldoc2md
+        run: dotnet tool install --global xmldoc2md
+        
+      - name: Convert XML docs to Markdown
+        run: |
+          mkdir -p docs/api
+          xmldoc2md --output docs/api ./obj/Debug/*/My*.xml
+          
+      # Setup and build with Jekyll
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./
           destination: ./_site
+          
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
