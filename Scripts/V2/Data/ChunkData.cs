@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace V2.Data
@@ -12,23 +13,19 @@ namespace V2.Data
         List<BeltData> _belts;
         
         public const int ChunkSize = 32;
-        
         public bool isDirty;
+        
+        // Performance tracking
+        public static PerformanceStats PerformanceStats { get; private set; } = new PerformanceStats();
 
-        // Events for machine tracking
         public event Action<Machine> OnMachineAdded;
         public event Action<Machine> OnMachineRemoved;
-        
-        //Events for Connector trackiong
+
         public event Action<Connector> OnConnectorAdded;
         public event Action<Connector> OnConnectorRemoved;
-        
-        //Events for Belt trackiong
+
         public event Action<BeltData> OnBeltAdded;
          public event Action<BeltData> OnBeltRemoved;
-        
-        // Property still useful for direct access when needed
-        public int MachineCount => _machines.Count;
         
         public ChunkData(Vector2Int coords)
         {
@@ -77,21 +74,48 @@ namespace V2.Data
 
         public void ProcessTick(float dt)
         {
+            Stopwatch totalStopwatch = new Stopwatch();
+            Stopwatch componentStopwatch = new Stopwatch();
+            float elapsedMs;
+            
+            // Start timing the entire process
+            totalStopwatch.Start();
+            
+            // Time machines processing
+            componentStopwatch.Restart();
             foreach (var m in _machines)
             {
                 m.Tick(dt);
-              
             }
-
+            componentStopwatch.Stop();
+            elapsedMs = componentStopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000f;
+            PerformanceStats.MachineStats.RecordTime(elapsedMs);
+            
+            // Time connectors processing
+            componentStopwatch.Restart();
             foreach (var c in _connectors)
             {
                 c.Tick(dt);
             }
-
+            componentStopwatch.Stop();
+            elapsedMs = componentStopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000f;
+            PerformanceStats.ConnectorStats.RecordTime(elapsedMs);
+            
+            // Time belts processing
+            componentStopwatch.Restart();
             foreach (var b in _belts)
             {   
                 b.Tick(dt);
-            };
+            }
+            componentStopwatch.Stop();
+            elapsedMs = componentStopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000f;
+            PerformanceStats.BeltStats.RecordTime(elapsedMs);
+            
+            // Stop timing the entire process and record total time
+            totalStopwatch.Stop();
+            float totalElapsedMs = totalStopwatch.ElapsedTicks / (float)Stopwatch.Frequency * 1000f;
+            PerformanceStats.TotalStats.RecordTime(totalElapsedMs);
+            
             MarkDirty();
         }
 
@@ -104,7 +128,7 @@ namespace V2.Data
         {
             foreach (var machine in _machines)
             {
-                if (machine.LocalPostion == position)
+                if (machine.LocalPosition == position)
                 {
                     return machine;
                 }
@@ -126,18 +150,16 @@ namespace V2.Data
         {
             return _belts;
         }
-
       
         public BeltData GetBeltAt(Vector2Int pos)
         {
             foreach (var b in _belts) 
             {
-                if (b.LocalPostion == pos)
+                if (b.LocalPosition == pos)
                 {
                     return b;
                 }
             }
-
             return null;
         }
     }

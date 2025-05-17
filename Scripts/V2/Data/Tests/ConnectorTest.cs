@@ -33,7 +33,7 @@ namespace V2.Data.Tests
         {
             // Assert
             Assert.NotNull(_connector);
-            Assert.That(_connector.LocalPostion, Is.EqualTo(_defaultPosition));
+            Assert.That(_connector.LocalPosition, Is.EqualTo(_defaultPosition));
             Assert.That(_connector.Rotation, Is.EqualTo(0f));
             Assert.IsFalse(_connector.HasInputItem);
             Assert.IsTrue(_connector.CanDropItem);

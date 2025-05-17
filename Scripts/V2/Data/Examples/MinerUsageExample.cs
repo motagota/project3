@@ -57,7 +57,7 @@ namespace V2.Data.Examples
                 SimulationItem item = miner.TakeItem();
                 if (item != null)
                 {
-                    Debug.Log($"Collected {item.ItemType} from miner at position {miner.LocalPostion}");
+                    Debug.Log($"Collected {item.ItemType} from miner at position {miner.LocalPosition}");
                     // In a real implementation, you would add this item to an inventory or transport it
                 }
             }

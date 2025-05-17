@@ -27,15 +27,15 @@ namespace V2.Data
             switch ((int)Rotation)
             {
                 case 0 :
-                    return LocalPostion + new Vector2Int(-1,0);
+                    return LocalPosition + new Vector2Int(-1,0);
                 case 90 :
-                    return LocalPostion + new Vector2Int(0,-1);
+                    return LocalPosition + new Vector2Int(0,-1);
                 case 180 :
-                    return LocalPostion + new Vector2Int(1,0);
+                    return LocalPosition + new Vector2Int(1,0);
                 case 270 :
-                    return LocalPostion + new Vector2Int(0,1);
+                    return LocalPosition + new Vector2Int(0,1);
                 default:
-                    return LocalPostion;
+                    return LocalPosition;
             }
             
         }
@@ -45,15 +45,15 @@ namespace V2.Data
             switch ((int)Rotation)
             {
                 case 0 :
-                    return LocalPostion + new Vector2Int(1,0);
+                    return LocalPosition + new Vector2Int(1,0);
                 case 90 :
-                    return LocalPostion + new Vector2Int(0,1);
+                    return LocalPosition + new Vector2Int(0,1);
                 case 180 :
-                    return LocalPostion + new Vector2Int(-1,0);
+                    return LocalPosition + new Vector2Int(-1,0);
                 case 270 :
-                    return LocalPostion + new Vector2Int(0,-1);
+                    return LocalPosition + new Vector2Int(0,-1);
                 default:
-                    return LocalPostion;
+                    return LocalPosition;
             }
             
         }

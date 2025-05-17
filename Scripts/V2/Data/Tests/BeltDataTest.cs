@@ -39,7 +39,7 @@ namespace V2.Data.Tests
         {
             // Assert
             Assert.NotNull(_belt);
-            Assert.That(_belt.LocalPostion, Is.EqualTo(_defaultPosition));
+            Assert.That(_belt.LocalPosition, Is.EqualTo(_defaultPosition));
             Assert.That(_belt.Rotation, Is.EqualTo(0f));
             Assert.IsFalse(_belt.HasItem);
         }

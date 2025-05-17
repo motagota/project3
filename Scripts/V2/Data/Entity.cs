@@ -7,23 +7,23 @@ namespace V2.Data
         static int IDCounter = 0;
         public readonly int ID;
 
-        public Vector2Int LocalPostion;
+        public Vector2Int LocalPosition;
         public float Rotation;
 
         public Entity(Vector2Int localPosition)
         {
             ID = IDCounter++;
-            LocalPostion = localPosition;
+            LocalPosition = localPosition;
             Rotation = 0;
         }
 
         public void SetPosition(Vector2Int newPosition)
         {
-            LocalPostion = newPosition;
+            LocalPosition = newPosition;
         }
         public void SetPosition(Vector2 worldPosition)
         {
-            LocalPostion = GridUtility.SnapToGrid(worldPosition);
+            LocalPosition = GridUtility.SnapToGrid(worldPosition);
         }
 
         public void Rotate()

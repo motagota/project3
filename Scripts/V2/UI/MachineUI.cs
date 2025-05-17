@@ -7,15 +7,15 @@ namespace V2.UI
 {
     public class MachineUI : MonoBehaviour
     {
-        [Header("UI References")]
-        [SerializeField] private GameObject uiPanel;
-        [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI recipeNameText;
-        [SerializeField] private TextMeshProUGUI inputItemsText;
-        [SerializeField] private TextMeshProUGUI outputItemText;
-        [SerializeField] private TextMeshProUGUI completedRecipesText;
-        [SerializeField] private Slider progressBar;
-        [SerializeField] private Toggle enabledToggle;
+        // These fields will be set by WindowManager when UI is created
+        [HideInInspector] public GameObject uiPanel;
+        [HideInInspector] public TextMeshProUGUI titleText;
+        [HideInInspector] public TextMeshProUGUI recipeNameText;
+        [HideInInspector] public TextMeshProUGUI inputItemsText;
+        [HideInInspector] public TextMeshProUGUI outputItemText;
+        [HideInInspector] public TextMeshProUGUI completedRecipesText;
+        [HideInInspector] public Slider progressBar;
+        [HideInInspector] public Toggle enabledToggle;
         
         private Machine _currentMachine;
         private SimulationManagerV2 _simulationManager;
@@ -23,9 +23,11 @@ namespace V2.UI
         private void Awake()
         {
             _simulationManager = FindObjectOfType<SimulationManagerV2>();
-            HideUI();
-            
-            // Add listener to the toggle
+        }
+        
+        private void Start()
+        {
+            // Add listener to the toggle if it exists
             if (enabledToggle != null)
             {
                 enabledToggle.onValueChanged.AddListener(OnToggleChanged);
@@ -34,54 +36,45 @@ namespace V2.UI
         
         private void Update()
         {
-            // Update the UI if a machine is selected
             if (_currentMachine != null)
             {
                 UpdateProgressBar();
                 UpdateCompletedRecipes();
             }
             
-            // Check for mouse click to select a machine
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && !IsPointerOverUI())
             {
                 CheckForMachineSelection();
             }
             
-            // Close UI with Escape key
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape) && _currentMachine != null)
             {
                 HideUI();
             }
         }
         
+        private bool IsPointerOverUI()
+        {
+            return UnityEngine.EventSystems.EventSystem.current != null && 
+                   UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        }
+        
         private void CheckForMachineSelection()
         {
-            // Convert mouse position to world position
             Vector3 mousePos = Input.mousePosition;
-            // Set z to the distance from the camera to the grid plane (typically 10 units in Unity)
             mousePos.z = 10f;
-            Vector2 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
-            
-            // Debug the positions
-            Debug.Log($"Mouse Position: {mousePos}, World Position: {worldPos}, Grid Position: {GridUtility.SnapToGrid(worldPos)}");
-            
-            // Get the chunk at this position
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
             Vector2Int gridPos = GridUtility.SnapToGrid(worldPos);
-            // Use a fixed chunk coordinate (0,0) since we're working with a single chunk in this simulation
             Vector2Int chunkCoord = new Vector2Int(0, 0);
-            
             ChunkData chunk = _simulationManager.GetChunk(chunkCoord);
+            
             if (chunk != null)
             {
-                // Check if there's a machine at this position
                 Machine machine = chunk.GetMachineAt(gridPos);
                 if (machine != null)
                 {
-                    SelectMachine(machine);
-                }
-                else
-                {
-                    HideUI();
+                    // Use WindowManager to create/show the machine UI
+                    WindowManager.Instance.CreateMachineWindow(machine);
                 }
             }
         }
@@ -89,7 +82,6 @@ namespace V2.UI
         public void SelectMachine(Machine machine)
         {
             _currentMachine = machine;
-            ShowUI();
             UpdateUI();
         }
         
@@ -97,44 +89,50 @@ namespace V2.UI
         {
             if (_currentMachine == null) return;
             
-            // Set machine title
             string machineType = _currentMachine.GetType().Name;
-            titleText.text = machineType;
+            if (titleText != null)
+            {
+                titleText.text = machineType;
+            }
             
-            // Set recipe information
             Recipe recipe = _currentMachine.CurrentRecipe;
-            recipeNameText.text = $"Recipe: {recipe.OutputItemType}";
-            
-            // Set input items
-            string inputItemsStr = "Inputs: ";
-            if (recipe.InputItemTypes.Count == 0)
+            if (recipeNameText != null)
             {
-                inputItemsStr += "None";
+                recipeNameText.text = $"Recipe: {recipe.OutputItemType}";
             }
-            else
+            
+            if (inputItemsText != null)
             {
-                inputItemsStr += string.Join(", ", recipe.InputItemTypes);
-                inputItemsStr += $" (x{recipe.InputItemCount})";
+                string inputItemsStr = "Inputs: ";
+                if (recipe.InputItemTypes.Count == 0)
+                {
+                    inputItemsStr += "None";
+                }
+                else
+                {
+                    inputItemsStr += string.Join(", ", recipe.InputItemTypes);
+                    inputItemsStr += $" (x{recipe.InputItemCount})";
+                }
+                inputItemsText.text = inputItemsStr;
             }
-            inputItemsText.text = inputItemsStr;
             
-            // Set output item
-            outputItemText.text = $"Output: {recipe.OutputItemType}";
+            if (outputItemText != null)
+            {
+                outputItemText.text = $"Output: {recipe.OutputItemType}";
+            }
             
-            // Set completed recipes
             UpdateCompletedRecipes();
-            
-            // Set progress bar
             UpdateProgressBar();
             
-            // Set enabled toggle
-            enabledToggle.isOn = _currentMachine.IsEnabled;
+            if (enabledToggle != null)
+            {
+                enabledToggle.isOn = _currentMachine.IsEnabled;
+            }
         }
         
         private void UpdateProgressBar()
         {
             if (_currentMachine == null || progressBar == null) return;
-            
             float progress = _currentMachine.Progress / _currentMachine.CurrentRecipe.Duration;
             progressBar.value = progress;
         }
@@ -142,7 +140,6 @@ namespace V2.UI
         private void UpdateCompletedRecipes()
         {
             if (_currentMachine == null || completedRecipesText == null) return;
-            
             completedRecipesText.text = $"Completed: {_currentMachine.CompletedRecipes}";
         }
         
@@ -154,20 +151,22 @@ namespace V2.UI
             }
         }
         
-        private void ShowUI()
+        private void HideUI()
         {
-            if (uiPanel != null)
+            if (_currentMachine != null)
             {
-                uiPanel.SetActive(true);
+                string windowId = MachineSelectionManager.GetMachineWindowId(_currentMachine);
+                WindowManager.Instance.CloseWindow(windowId);
+                _currentMachine = null;
             }
         }
         
-        private void HideUI()
+        private void OnDestroy()
         {
-            if (uiPanel != null)
+            // Clean up event listeners when the UI is destroyed
+            if (enabledToggle != null)
             {
-                uiPanel.SetActive(false);
-                _currentMachine = null;
+                enabledToggle.onValueChanged.RemoveListener(OnToggleChanged);
             }
         }
     }

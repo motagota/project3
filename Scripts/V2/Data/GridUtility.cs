@@ -26,19 +26,19 @@ namespace V2.Data
         
             foreach (var machine in chunk.GetMachines())
             {
-                if (machine.LocalPostion == gridPosition)
+                if (machine.LocalPosition == gridPosition)
                     return true;
             }
             
             foreach (var connector in chunk.GetConnectors())
             {
-                if (connector.LocalPostion == gridPosition)
+                if (connector.LocalPosition == gridPosition)
                     return true;
             }
             
             foreach (var belt in chunk.GetBelts())
             {
-                if (belt.LocalPostion == gridPosition)
+                if (belt.LocalPosition == gridPosition)
                     return true;
             }
             

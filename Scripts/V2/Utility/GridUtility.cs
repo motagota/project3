@@ -8,11 +8,11 @@ public static class GridUtility
     /// <summary>
     /// Snaps a world position to the nearest grid position
     /// </summary>
-    public static Vector2Int SnapToGrid(Vector2 worldPosition)
+    public static Vector2Int SnapToGrid(Vector3 worldPosition)
     {
         int x = Mathf.RoundToInt(worldPosition.x / GridSize);
-        int y = Mathf.RoundToInt(worldPosition.y / GridSize);
-        return new Vector2Int(x, y);
+        int z = Mathf.RoundToInt(worldPosition.z / GridSize);
+        return new Vector2Int(x, z);
     }
     
     /// <summary>
@@ -37,7 +37,7 @@ public static class GridUtility
         // Check for belts
         foreach (var belt in chunk.GetBelts())
         {
-            if (belt.LocalPostion == gridPosition)
+            if (belt.LocalPosition == gridPosition)
             {
                 return true;
             }
@@ -46,7 +46,7 @@ public static class GridUtility
         // Check for connectors
         foreach (var connector in chunk.GetConnectors())
         {
-            if (connector.LocalPostion == gridPosition)
+            if (connector.LocalPosition == gridPosition)
             {
                 return true;
             }

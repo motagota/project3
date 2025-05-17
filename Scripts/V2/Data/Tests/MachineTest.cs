@@ -50,7 +50,7 @@ namespace V2.Data.Tests
         public void MachineInitializedWithCorrectPosition()
         {
             // Assert
-            Assert.That(_machine.LocalPostion, Is.EqualTo(_defaultPosition));
+            Assert.That(_machine.LocalPosition, Is.EqualTo(_defaultPosition));
             Assert.That(_machine.Rotation, Is.EqualTo(0f));
         }
         

@@ -35,7 +35,7 @@ namespace V2.GameObjects
             {
                 GameObject beltGO = Instantiate(beltPrefab);
                 beltGO.name = $"Belt_{belt.ID}";
-                beltGO.transform.position = new Vector3(belt.LocalPostion.x, 0, belt.LocalPostion.y);
+                beltGO.transform.position = new Vector3(belt.LocalPosition.x, 0, belt.LocalPosition.y);
                 beltGO.transform.rotation =  Quaternion.Euler(0, belt.Rotation, 0);
                 beltGO.transform.SetParent(transform);
                 BeltRenderer beltRenderer = beltGO.GetComponent<BeltRenderer>();
@@ -43,7 +43,7 @@ namespace V2.GameObjects
                 {
                     beltRenderer.Initialize(belt);
                 }
-                _beltGOs.Add(belt.LocalPostion, beltGO);
+                _beltGOs.Add(belt.LocalPosition, beltGO);
             }
         }
 
@@ -53,7 +53,7 @@ namespace V2.GameObjects
             {
                 GameObject connectorGO = Instantiate(connectorPrefab);
                 connectorGO.name = $"Connector_{connector.ID}";
-                connectorGO.transform.position = new Vector3(connector.LocalPostion.x, 0, connector.LocalPostion.y);
+                connectorGO.transform.position = new Vector3(connector.LocalPosition.x, 0, connector.LocalPosition.y);
                 connectorGO.transform.rotation =  Quaternion.Euler(0, connector.Rotation, 0);
                 connectorGO.transform.SetParent(transform);
                 ConnectorRenderer connectorRenderer = connectorGO.GetComponent<ConnectorRenderer>();
@@ -61,7 +61,7 @@ namespace V2.GameObjects
                 {
                     connectorRenderer.Initialize(connector);
                 }
-                _connectorGOs.Add(connector.LocalPostion, connectorGO);
+                _connectorGOs.Add(connector.LocalPosition, connectorGO);
             }
         }
         private void MachineInit()
@@ -70,10 +70,10 @@ namespace V2.GameObjects
             {
                 GameObject machineGO = Instantiate(machinePrefab);
                 machineGO.name = $"Machine_{machine.ID}";
-                machineGO.transform.position = new Vector3(machine.LocalPostion.x, 0, machine.LocalPostion.y);
+                machineGO.transform.position = new Vector3(machine.LocalPosition.x, 0, machine.LocalPosition.y);
                 machineGO.transform.rotation =  Quaternion.Euler(0, machine.Rotation, 0);
                 machineGO.transform.SetParent(transform);
-                _machineGOs.Add(machine.LocalPostion, machineGO);
+                _machineGOs.Add(machine.LocalPosition, machineGO);
             }
         }
 
@@ -81,7 +81,7 @@ namespace V2.GameObjects
         {
             foreach (Machine machine in _data.GetMachines())
             {
-                GameObject machineGO = _machineGOs[machine.LocalPostion];
+                GameObject machineGO = _machineGOs[machine.LocalPosition];
             }
         }
 

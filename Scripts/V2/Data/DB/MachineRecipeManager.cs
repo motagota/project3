@@ -71,7 +71,7 @@ namespace V2.Data
             machine.CurrentRecipe = recipe;
             _machineRecipeAssignments[machine] = recipeId;
             
-            Debug.Log($"Assigned recipe '{recipeId}' to machine at {machine.LocalPostion}");
+            Debug.Log($"Assigned recipe '{recipeId}' to machine at {machine.LocalPosition}");
             return true;
         }
         
