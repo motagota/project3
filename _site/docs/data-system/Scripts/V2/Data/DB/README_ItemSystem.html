@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Item System Documentation </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Item System Documentation ">
+    
+    
+      <link rel="shortcut icon" href="../../../../../../favicon.ico">
+      <link rel="stylesheet" href="../../../../../../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../../../../../../styles/docfx.css">
+      <link rel="stylesheet" href="../../../../../../styles/main.css">
+      <meta property="docfx:navrel" content="../../../../../../toc.html">
+      <meta property="docfx:tocrel" content="../../../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../../../../../../index.html">
+                <img id="logo" class="svg" src="../../../../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="item-system-documentation">Item System Documentation</h1>
+
+<h2 id="overview">Overview</h2>
+<p>This item system provides a flexible way to configure and manage items for your simulation. It allows you to define various item types with different properties and makes them available throughout your simulation.</p>
+<h2 id="core-components">Core Components</h2>
+<h3 id="itemdefinition-class">ItemDefinition Class</h3>
+<p>The base class that defines what an item is. Each item has:</p>
+<ul>
+<li><strong>Basic Properties</strong>: DisplayName, Description, Category</li>
+<li><strong>Inventory Properties</strong>: Stackable, MaxStackSize</li>
+<li><strong>Visual Properties</strong>: IconPath, IconColor</li>
+<li><strong>Physical Properties</strong>: Mass, Size</li>
+<li><strong>Gameplay Properties</strong>: Value, Consumable, ConsumptionEffect</li>
+<li><strong>Custom Properties</strong>: A dictionary for any additional properties</li>
+</ul>
+<h3 id="itemdatabase">ItemDatabase</h3>
+<p>A singleton class that stores and manages all item definitions. It provides methods to:</p>
+<ul>
+<li>Add items</li>
+<li>Retrieve items by ID</li>
+<li>Find items by category</li>
+<li>Get all available items</li>
+</ul>
+<h3 id="itemfactory">ItemFactory</h3>
+<p>A utility class with static methods to create common item types:</p>
+<ul>
+<li>Raw materials</li>
+<li>Processed materials</li>
+<li>Components</li>
+<li>Tools</li>
+<li>Consumables</li>
+<li>Fuels</li>
+</ul>
+<h3 id="itemdatabasemanager">ItemDatabaseManager</h3>
+<p>Handles saving and loading item definitions to/from JSON files for persistence between game sessions.</p>
+<h3 id="itemdatabaseeditor">ItemDatabaseEditor</h3>
+<p>A Unity Editor window that allows you to manage items directly in the Unity Editor.</p>
+<h2 id="usage-examples">Usage Examples</h2>
+<h3 id="accessing-the-database">Accessing the Database</h3>
+<pre><code class="lang-csharp">// Get the item database singleton
+ItemDatabase itemDB = ItemDatabase.Instance;
+
+// Get an item definition
+ItemDefinition ironOre = itemDB.GetItem(&quot;IronOre&quot;);
+
+// Check item properties
+Debug.Log($&quot;Item: {ironOre.DisplayName}, Category: {ironOre.Category}&quot;);
+</code></pre>
+<h3 id="creating-custom-items">Creating Custom Items</h3>
+<pre><code class="lang-csharp">// Create a new item definition
+ItemDefinition customItem = new ItemDefinition(
+    displayName: &quot;Advanced Component&quot;,
+    description: &quot;A complex component used in high-tech machinery.&quot;,
+    category: &quot;Component&quot;,
+    stackable: true,
+    maxStackSize: 20
+);
+
+// Set additional properties
+customItem.SetVisualProperties(&quot;Icons/advanced_component&quot;, Color.blue);
+customItem.SetPhysicalProperties(2.5f, new Vector3(0.5f, 0.5f, 0.2f));
+customItem.SetGameplayProperties(25.0f, false);
+
+// Add custom properties if needed
+customItem.SetCustomProperty(&quot;RequiresPower&quot;, true);
+customItem.SetCustomProperty(&quot;TechLevel&quot;, 3);
+
+// Add to the database
+ItemDatabase.Instance.AddItem(&quot;AdvancedComponent&quot;, customItem);
+</code></pre>
+<h3 id="using-the-itemfactory">Using the ItemFactory</h3>
+<pre><code class="lang-csharp">// Create a raw material
+ItemDefinition ironOre = ItemFactory.CreateRawMaterial(
+    displayName: &quot;Iron Ore&quot;,
+    description: &quot;Raw iron ore extracted from the ground.&quot;,
+    value: 1.0f,
+    mass: 2.0f
+);
+
+// Create a tool
+ItemDefinition pickaxe = ItemFactory.CreateTool(
+    displayName: &quot;Pickaxe&quot;,
+    description: &quot;A tool for mining resources.&quot;,
+    durability: 200.0f,
+    value: 50.0f
+);
+
+// Add to the database
+ItemDatabase.Instance.AddItem(&quot;IronOre&quot;, ironOre);
+ItemDatabase.Instance.AddItem(&quot;Pickaxe&quot;, pickaxe);
+</code></pre>
+<h3 id="working-with-categories">Working with Categories</h3>
+<pre><code class="lang-csharp">// Get all raw materials
+var rawMaterials = ItemDatabase.Instance.GetItemsByCategory(&quot;RawMaterial&quot;);
+
+// Display all raw materials
+foreach (var pair in rawMaterials)
+{
+    Debug.Log($&quot;ID: {pair.Key}, Name: {pair.Value.DisplayName}&quot;);
+}
+</code></pre>
+<h2 id="saving-and-loading-items">Saving and Loading Items</h2>
+<p>To save or load items, add the ItemDatabaseManager component to a GameObject in your scene:</p>
+<pre><code class="lang-csharp">// Get the manager component
+ItemDatabaseManager manager = GetComponent&lt;ItemDatabaseManager&gt;();
+
+// Save items to file
+manager.SaveItemsToFile();
+
+// Load items from file
+manager.LoadItemsFromFile();
+</code></pre>
+<h2 id="editor-tools">Editor Tools</h2>
+<p>To access the Item Database Editor, go to Tools &gt; Item Database Editor in the Unity menu. This provides a user-friendly interface to manage your items without writing code.</p>
+<h2 id="integration-with-recipes">Integration with Recipes</h2>
+<p>This Item System works seamlessly with the Recipe System. The recipe system references items by their string IDs, which correspond to the item IDs in this database.</p>
+<h2 id="future-expansion">Future Expansion</h2>
+<p>The system is designed to be easily expandable. Some potential future enhancements:</p>
+<ul>
+<li>Item quality levels or rarities</li>
+<li>Item crafting requirements</li>
+<li>Item usage effects and animations</li>
+<li>Item equipment slots and attachment points</li>
+<li>Item decay or expiration mechanics</li>
+</ul>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/motagota/project3/blob/master/Scripts/V2/Data/DB/README_ItemSystem.md/#L1" class="contribution-link">Edit this page</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../../../../../../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../../../../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../../../../styles/main.js"></script>
+  </body>
+</html>

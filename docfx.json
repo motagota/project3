@@ -18,6 +18,10 @@
         },
         {
           "files": ["docs/**.md", "docs/**/toc.yml", "toc.yml", "*.md"]
+        },
+        {
+          "files": ["Scripts/V2/Data/DB/README_*.md"],
+          "dest": "docs/data-system"
         }
       ],
       "resource": [

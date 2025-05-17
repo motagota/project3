@@ -10,6 +10,10 @@ Welcome to the documentation for My Unity Project.
 
 Check out the [API documentation](docs/api/index.html) generated from code comments.
 
+## Data Systems
+
+Explore our [Data Systems documentation](docs/data-system/index.html) for information about the Item and Recipe systems.
+
 ## Project Overview
 
 This project is a simulation game with conveyor belts, machines, and resource management.

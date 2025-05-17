@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Recipe System Documentation </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Recipe System Documentation ">
+    
+    
+      <link rel="shortcut icon" href="../../../../../../favicon.ico">
+      <link rel="stylesheet" href="../../../../../../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../../../../../../styles/docfx.css">
+      <link rel="stylesheet" href="../../../../../../styles/main.css">
+      <meta property="docfx:navrel" content="../../../../../../toc.html">
+      <meta property="docfx:tocrel" content="../../../../toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../../../../../../index.html">
+                <img id="logo" class="svg" src="../../../../../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="recipe-system-documentation">Recipe System Documentation</h1>
+
+<h2 id="overview">Overview</h2>
+<p>This recipe system provides a flexible way to configure and manage recipes for your simulation. It allows you to define various recipes with different inputs, outputs, and processing times, and makes them available throughout your simulation.</p>
+<h2 id="core-components">Core Components</h2>
+<h3 id="recipe-class">Recipe Class</h3>
+<p>The base class that defines what a recipe is. Each recipe has:</p>
+<ul>
+<li><strong>Duration</strong>: How long it takes to process the recipe</li>
+<li><strong>OutputItemType</strong>: The type of item produced</li>
+<li><strong>InputItemTypes</strong>: List of item types required as inputs</li>
+<li><strong>InputItemCount</strong>: Number of each input item required</li>
+</ul>
+<h3 id="recipedatabase">RecipeDatabase</h3>
+<p>A singleton class that stores and manages all recipes. It provides methods to:</p>
+<ul>
+<li>Add recipes</li>
+<li>Retrieve recipes by ID</li>
+<li>Find recipes by input or output item types</li>
+<li>Get all available recipes</li>
+</ul>
+<h3 id="recipefactory">RecipeFactory</h3>
+<p>A utility class with static methods to create common recipe types:</p>
+<ul>
+<li>Basic processing recipes (1 input → 1 output)</li>
+<li>Multi-input recipes (multiple inputs → 1 output)</li>
+<li>Generator recipes (no inputs → 1 output)</li>
+<li>Recycling recipes (placeholder for future expansion)</li>
+</ul>
+<h3 id="recipedatabasemanager">RecipeDatabaseManager</h3>
+<p>Handles saving and loading recipes to/from JSON files for persistence between game sessions.</p>
+<h3 id="recipedatabaseeditor">RecipeDatabaseEditor</h3>
+<p>A Unity Editor window that allows you to manage recipes directly in the Unity Editor.</p>
+<h2 id="usage-examples">Usage Examples</h2>
+<h3 id="setting-up-a-machine-with-a-recipe">Setting Up a Machine with a Recipe</h3>
+<pre><code class="lang-csharp">// Get a recipe from the database
+Recipe ironPlateRecipe = RecipeDatabase.Instance.GetRecipe(&quot;IronOre_to_IronPlate&quot;);
+
+// Assign it to a machine
+machine.CurrentRecipe = ironPlateRecipe;
+</code></pre>
+<h3 id="creating-a-custom-recipe">Creating a Custom Recipe</h3>
+<pre><code class="lang-csharp">// Create a new recipe
+Recipe customRecipe = new Recipe(
+    duration: 5.0f,
+    outputItemType: &quot;AdvancedComponent&quot;,
+    inputItemTypes: new List&lt;string&gt; { &quot;BasicComponent&quot;, &quot;Electronics&quot; },
+    inputItemCount: 2
+);
+
+// Add it to the database
+RecipeDatabase.Instance.AddRecipe(&quot;Advanced_Component_Recipe&quot;, customRecipe);
+</code></pre>
+<h3 id="using-the-recipefactory">Using the RecipeFactory</h3>
+<pre><code class="lang-csharp">// Create a basic processing recipe
+Recipe basicRecipe = RecipeFactory.CreateBasicProcessingRecipe(
+    inputType: &quot;RawMaterial&quot;,
+    outputType: &quot;ProcessedMaterial&quot;,
+    duration: 3.0f,
+    inputCount: 1
+);
+
+// Create a generator recipe
+Recipe generatorRecipe = RecipeFactory.CreateGeneratorRecipe(
+    outputType: &quot;Energy&quot;,
+    duration: 1.0f
+);
+</code></pre>
+<h3 id="finding-recipes">Finding Recipes</h3>
+<pre><code class="lang-csharp">// Find all recipes that produce &quot;Circuit&quot;
+List&lt;Recipe&gt; circuitRecipes = RecipeDatabase.Instance.GetRecipesByOutput(&quot;Circuit&quot;);
+
+// Find all recipes that require &quot;IronPlate&quot; as input
+List&lt;Recipe&gt; ironPlateRecipes = RecipeDatabase.Instance.GetRecipesByInput(&quot;IronPlate&quot;);
+</code></pre>
+<h2 id="integration-with-machines">Integration with Machines</h2>
+<p>The Machine class is already set up to work with recipes. Each machine has a CurrentRecipe property that determines what it produces and what inputs it requires.</p>
+<h2 id="saving-and-loading-recipes">Saving and Loading Recipes</h2>
+<p>To save or load recipes, add the RecipeDatabaseManager component to a GameObject in your scene:</p>
+<pre><code class="lang-csharp">// Get the manager component
+RecipeDatabaseManager manager = GetComponent&lt;RecipeDatabaseManager&gt;();
+
+// Save recipes to file
+manager.SaveRecipesToFile();
+
+// Load recipes from file
+manager.LoadRecipesFromFile();
+</code></pre>
+<h2 id="editor-tools">Editor Tools</h2>
+<p>To access the Recipe Database Editor, go to Tools &gt; Recipe Database Editor in the Unity menu. This provides a user-friendly interface to manage your recipes without writing code.</p>
+<h2 id="future-expansion">Future Expansion</h2>
+<p>The system is designed to be easily expandable. Some potential future enhancements:</p>
+<ul>
+<li>Support for multiple outputs from a single recipe</li>
+<li>Recipe categories or tags for better organization</li>
+<li>Recipe prerequisites or tech tree integration</li>
+<li>Recipe efficiency modifiers based on machine types</li>
+</ul>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/motagota/project3/blob/master/Scripts/V2/Data/DB/README_RecipeSystem.md/#L1" class="contribution-link">Edit this page</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../../../../../../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../../../../../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../../../../../styles/main.js"></script>
+  </body>
+</html>

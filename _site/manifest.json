@@ -1,0 +1,77 @@
+{
+  "source_base_path": "C:/Users/james/My project (3)/Assets",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Conceptual",
+      "source_relative_path": "Scripts/V2/Data/DB/README_ItemSystem.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/data-system/Scripts/V2/Data/DB/README_ItemSystem.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "Scripts/V2/Data/DB/README_RecipeSystem.md",
+      "output": {
+        ".html": {
+          "relative_path": "docs/data-system/Scripts/V2/Data/DB/README_RecipeSystem.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "docs/data-system/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "docs/data-system/toc.html"
+        },
+        ".json": {
+          "relative_path": "docs/data-system/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "readme.md",
+      "output": {
+        ".html": {
+          "relative_path": "readme.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
