@@ -95,6 +95,16 @@ namespace V2.Data
                 maxStackSize: 100
             ));
             
+            AddItem("CopperPlate", new ItemDefinition(
+                id: "3",
+                displayName: "Copper Plate",
+                description: "Processed iron plate used in manufacturing.",
+                category: "ProcessedMaterial",
+                stackable: true,
+                maxStackSize: 100,
+                itemColor: new Color32(200, 90, 51, 255)
+            ));
+            
             AddItem("CopperWire", new ItemDefinition(
                 id: "4",
                 displayName: "Copper Wire",

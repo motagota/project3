@@ -47,3 +47,4 @@ MonoBehaviour:
   machinePrefab: {fileID: 7257899292084092607, guid: 7f5f1039d3c77034aa09b79a53614515, type: 3}
   connectorPrefab: {fileID: 836430437440421918, guid: 94517783b3747b043bd58ad70ec0d493, type: 3}
   beltPrefab: {fileID: 4670298833787755928, guid: e52062207ba895f4492b85e7925b51f0, type: 3}
+  storeageBoxPrefab: {fileID: 6208483975973294668, guid: 40159648d291ade49b0f5eecf257cf61, type: 3}

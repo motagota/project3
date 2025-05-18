@@ -71,144 +71,78 @@ public class SimulationManagerV2 : MonoBehaviour
         minerConnector1.Rotate(newChunk);
         minerConnector1.Rotate(newChunk);
         minerConnector1.Rotate(newChunk);
-        
-        
-        Machine tmpMachine = createNewMachine(newChunk,new Vector2Int(15, 6));
-        tmpMachine.SetRecipe(RecipeDatabase.Instance.GetRecipe("IronOre_to_IronPlate"));
-        
-        Connector tmpConnector = createNewConnector(newChunk,new Vector2Int(15, 5));
-        tmpConnector.Rotate(newChunk);
-       
-      /* 
-        createNewBelt(newChunk,new Vector2Int(5, 6));
-        createNewBelt(newChunk,new Vector2Int(6, 6));
-        createNewBelt(newChunk,new Vector2Int(7, 6));
-        createNewBelt(newChunk,new Vector2Int(8, 6));
-        createNewBelt(newChunk,new Vector2Int(9, 6));
 
+        for (int i = 6; i < 16; i++)
+        {
+            Machine tmpMachine = createNewMachine(newChunk, new Vector2Int(i, 6));
+            tmpMachine.SetRecipe(RecipeDatabase.Instance.GetRecipe("IronOre_to_IronPlate"));
+        }
+
+        for (int i = 6; i < 16; i++)
+        {
+            Connector tmpConnector = createNewConnector(newChunk, new Vector2Int(i, 5));
+            tmpConnector.Rotate(newChunk);
+        }
         
-        createNewMachine(newChunk,new Vector2Int(6, 8));
-        createNewMachine(newChunk,new Vector2Int(7, 8));
-        createNewMachine(newChunk,new Vector2Int(8, 8));
-        createNewMachine(newChunk,new Vector2Int(9, 8));
+        // lay down 20 belts
+        belt = null;
+        for (int i = 6; i < 26; i++)
+        {
+            belt = createNewBelt(newChunk, new Vector2Int(i, 8));
+            belt.Rotate(newChunk);
+            
+        }
         
+        for (int i = 6; i < 16; i++)
+        {
+            Connector tmpConnector = createNewConnector(newChunk, new Vector2Int(i, 7));
+            tmpConnector.Rotate(newChunk);
+        }
+
+       
+        for (int i = 6; i < 16; i++)
+        {
+            Machine tmpMachine = createNewMachine(newChunk, new Vector2Int(i, 10));
+            tmpMachine.SetRecipe(RecipeDatabase.Instance.GetRecipe("CopperOre_to_CopperPlate"));
+        }
         
-        BeltData newBelt = createNewBelt(newChunk,new Vector2Int(5, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(6, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(7, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(8, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(9, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(10, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(11, 10));
-        newBelt.Rotate(newChunk);
-        newBelt =createNewBelt(newChunk,new Vector2Int(12, 10));
-        newBelt.Rotate(newChunk);
+        for (int i = 6; i < 16; i++)
+        {
+            Connector tmpConnector = createNewConnector(newChunk, new Vector2Int(i, 9));
+            tmpConnector.Rotate(newChunk);
+            tmpConnector.Rotate(newChunk);
+            tmpConnector.Rotate(newChunk);
+        }
         
-        createNewMachine(newChunk,new Vector2Int(5, 12));
-        createNewMachine(newChunk,new Vector2Int(6, 12));
-        createNewMachine(newChunk,new Vector2Int(7, 12));
-        createNewMachine(newChunk,new Vector2Int(8, 12));
-        createNewMachine(newChunk,new Vector2Int(9, 12));
+        for (int i = 4; i < 16; i++)
+        {
+            belt = createNewBelt(newChunk, new Vector2Int(i, 12));
+            belt.Rotate(newChunk);
+            
+        }
         
-        // Create a miner at the start of the second belt line (5,14)
+        for (int i = 6; i < 16; i++)
+        {
+            Connector tmpConnector = createNewConnector(newChunk, new Vector2Int(i, 11));
+            tmpConnector.Rotate(newChunk);
+            tmpConnector.Rotate(newChunk);
+            tmpConnector.Rotate(newChunk);
+        }
+        
         createNewMiner(newChunk, new Vector2Int(4, 14), "CopperOre");
-        // Create a connector to connect the miner to the belt
-        Connector minerConnector2 = createNewConnector(newChunk, new Vector2Int(4, 13));
-        minerConnector2.Rotate(newChunk);
         
-        createNewBelt(newChunk,new Vector2Int(5, 14));
-        createNewBelt(newChunk,new Vector2Int(6, 14));
-        createNewBelt(newChunk,new Vector2Int(7, 14));
-        createNewBelt(newChunk,new Vector2Int(8, 14));
-        createNewBelt(newChunk,new Vector2Int(9, 14));
-        
-        createNewConnector(newChunk,new Vector2Int(5, 7)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(6, 7)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(7, 7)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(8, 7)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(9, 7)).Rotate(newChunk);
-        
-        createNewConnector(newChunk,new Vector2Int(5, 9)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(6, 9)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(7, 9)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(8, 9)).Rotate(newChunk);
-        createNewConnector(newChunk,new Vector2Int(9, 9)).Rotate(newChunk);
-        
-        Connector tmpConnector = createNewConnector(newChunk,new Vector2Int(5, 11));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
+        minerConnector1 = createNewConnector(newChunk, new Vector2Int(4, 13));
+        minerConnector1.Rotate(newChunk);
+        minerConnector1.Rotate(newChunk);
+        minerConnector1.Rotate(newChunk);
 
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(6, 11));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
         
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(7, 11));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
+        V2.Data.StorageBox s1 = new V2.Data.StorageBox(new Vector2Int(24, 10), 10);
+        newChunk.AddStorageBox(s1);
         
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(8, 11));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
+        minerConnector1 = createNewConnector(newChunk, new Vector2Int(24, 09));
+        minerConnector1.Rotate(newChunk);
         
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(9, 11));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(5, 13));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(6, 13));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(7, 13));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(8, 13));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(9, 13));
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        tmpConnector.Rotate(newChunk);
-        
-        
-        
-       
-        List<string> inputTypes = new List<string> { "Iron" };
-        Recipe consumptionRecipe = new Recipe(
-            duration: 1.0f,
-            outputItemType: "ProcessedIron",
-            inputItemTypes: inputTypes,
-            inputItemCount: 1
-        );
-
-        createNewMachine(newChunk,new Vector2Int(11, 12), consumptionRecipe);
-        
-       
-        
-        tmpConnector = createNewConnector(newChunk,new Vector2Int(11, 11));
-        tmpConnector.Rotate(newChunk);
-        
-        */
         foreach (var b in newChunk.GetBelts())
         {
             b.CheckConnections(newChunk);

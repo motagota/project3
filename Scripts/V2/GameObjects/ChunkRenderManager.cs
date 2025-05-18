@@ -11,7 +11,7 @@ public class ChunkRenderManager : MonoBehaviour
     public GameObject chunkPrefab;
     
     [Tooltip("Game object pool size")]
-    public int gameObjectPoolSize = 50;
+    public int gameObjectPoolSize = 100;
     
     private SimulationManagerV2 _sim;
     private Queue<GameObject> _goPool = new Queue<GameObject>();

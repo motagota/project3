@@ -122,6 +122,11 @@ namespace V2.Data
             {
                 entity = chunk.GetBeltAt(position);
             }
+            
+            if (entity == null)
+            {
+                entity = chunk.GetStorageBoxAt(position);
+            }
             return entity;
         }
 
@@ -190,26 +195,21 @@ namespace V2.Data
                 }
                 else if (inputMachine.HasItem)
                 {
-                    SimulationItem peekItem = inputMachine.TakeItem();
-                    if (peekItem != null)
+                    // Simplify the logic for regular machines to match the miner approach
+                    // Don't take and give back the item, just check if we can accept it
+                    if (CanOutputAcceptItem(new SimulationItem("1", inputMachine.CurrentRecipe.OutputItemType)))
                     {
-                        inputMachine.GiveItem(peekItem);
-                     
-                        if (CanOutputAcceptItem(peekItem))
+                        SimulationItem item = inputMachine.TakeItem();
+                        if (item != null)
                         {
-                            SimulationItem item = inputMachine.TakeItem();
-                            if (item != null)
-                            {
-                                _inputHeldItem = item;
-                                OnItemPickedUp?.Invoke(this, item);
-                                _shouldCheckForItems = false; 
-                            }
+                            _inputHeldItem = item;
+                            OnItemPickedUp?.Invoke(this, item);
+                            _shouldCheckForItems = false;
                         }
-                        else
-                        {
-                          //  Debug.Log($"Connector {ID} skipped item from machine {inputMachine.ID} because output cannot accept it");
-                            _shouldCheckForItems = false; 
-                        }
+                    }
+                    else {
+                      
+                        _shouldCheckForItems = false; 
                     }
                 }
             }
@@ -244,6 +244,27 @@ namespace V2.Data
                     }
                 }
             }
+            else if (_inputConnector is StorageBox inputStorageBox)
+            {
+                if (inputStorageBox.HasItem && inputStorageBox.IsEnabled)
+                {
+                    // Take the first available item from the storage box
+                    SimulationItem item = inputStorageBox.TakeItem();
+                    if (item != null && CanOutputAcceptItem(item))
+                    {
+                        _inputHeldItem = item;
+                        OnItemPickedUp?.Invoke(this, item);
+                        Debug.Log($"Connector {ID} picked up item {item.ItemType} from storage box {inputStorageBox.ID}");
+                    }
+                    else if (item != null)
+                    {
+                        // If the output can't accept the item, put it back in the storage box
+                        inputStorageBox.GiveItem(item);
+                        _shouldCheckForItems = false;
+                        Debug.Log($"Connector {ID} returned item {item.ItemType} to storage box {inputStorageBox.ID} because output cannot accept it");
+                    }
+                }
+            }
         }
         
         private bool CanOutputAcceptItem(SimulationItem item)
@@ -256,6 +277,9 @@ namespace V2.Data
              
             if (_outputConnector is Machine outputMachine)
                 return outputMachine.CanAcceptItem(item);
+                
+            if (_outputConnector is StorageBox outputStorageBox)
+                return outputStorageBox.CanAcceptItem(item);
                 
             return false;
         }
@@ -290,6 +314,23 @@ namespace V2.Data
                 else
                 {
                     canDrop = false;
+                }
+            }
+            else if (_outputConnector is StorageBox outputStorageBox)
+            {
+                if (outputStorageBox.CanAcceptItem(_inputHeldItem) && outputStorageBox.GiveItem(_inputHeldItem))
+                {
+                    SimulationItem droppedItem = _inputHeldItem;
+                    _inputHeldItem = null;
+                    OnItemDropped?.Invoke(this, droppedItem);
+                    canDrop = true;
+                    _shouldCheckForItems = true;
+                    Debug.Log($"Connector {ID} dropped item {droppedItem.ItemType} into storage box {outputStorageBox.ID}");
+                }
+                else
+                {
+                    canDrop = false;
+                    Debug.Log($"Connector {ID} failed to drop item {_inputHeldItem.ItemType} into storage box {outputStorageBox.ID}");
                 }
             }
             else

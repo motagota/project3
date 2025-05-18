@@ -10,6 +10,7 @@ namespace V2.GameObjects
         public GameObject machinePrefab;
         public GameObject connectorPrefab;
         public GameObject beltPrefab;
+        public GameObject storeageBoxPrefab;
         
         private Vector2Int _coords;
         private SimulationManagerV2 _sim;
@@ -17,6 +18,7 @@ namespace V2.GameObjects
         private Dictionary<Vector2Int, GameObject> _machineGOs = new Dictionary<Vector2Int, GameObject>();
         private Dictionary<Vector2Int, GameObject> _connectorGOs = new Dictionary<Vector2Int, GameObject>();
         private Dictionary<Vector2Int, GameObject> _beltGOs = new Dictionary<Vector2Int, GameObject>();
+        private Dictionary<Vector2Int, GameObject> _sbGOs = new Dictionary<Vector2Int, GameObject>();
 
         public void Initialize(Vector2Int coords, SimulationManagerV2 sim)
         {
@@ -26,8 +28,28 @@ namespace V2.GameObjects
             MachineInit();
             BeltInit();
             ConnectorInit();
-            
+            StorageBoxInit();
+
         }
+
+        private void StorageBoxInit()
+        {
+            foreach (V2.Data.StorageBox sb in _data.GetStorageBoxes())
+            {
+                GameObject sbGO = Instantiate(storeageBoxPrefab);
+                sbGO.name = $"SB_{sb.ID}";
+                sbGO.transform.position = new Vector3(sb.LocalPosition.x, 0, sb.LocalPosition.y);
+                sbGO.transform.rotation =  Quaternion.Euler(0, sb.Rotation, 0);
+                sbGO.transform.SetParent(transform);
+                StorageBoxObject sbRenderer = sbGO.GetComponent<StorageBoxObject>();
+                if (sbRenderer != null)
+                {
+                    sbRenderer.Initialize(sb.LocalPosition);
+                }
+                _sbGOs.Add(sb.LocalPosition, sbGO);
+            }
+        }
+        
 
         private void BeltInit()
         {

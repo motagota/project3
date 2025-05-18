@@ -11,6 +11,7 @@ namespace V2.Data
         List<Machine> _machines;
         List<Connector> _connectors;
         List<BeltData> _belts;
+        List<StorageBox> _storeageBoxes;
         
         public const int ChunkSize = 32;
         public bool isDirty;
@@ -25,7 +26,10 @@ namespace V2.Data
         public event Action<Connector> OnConnectorRemoved;
 
         public event Action<BeltData> OnBeltAdded;
-         public event Action<BeltData> OnBeltRemoved;
+        public event Action<BeltData> OnBeltRemoved;
+        
+        public event Action<StorageBox> OnStoreageBoxAdded;
+        public event Action<StorageBox> OnStoreageBoxRemoved;   
         
         public ChunkData(Vector2Int coords)
         {
@@ -33,6 +37,7 @@ namespace V2.Data
             _machines = new List<Machine>();
             _connectors = new List<Connector>();
             _belts = new List<BeltData>();
+            _storeageBoxes = new List<StorageBox>();
         }
 
         public void AddConnector(Connector connector)
@@ -41,6 +46,13 @@ namespace V2.Data
             MarkDirty();
             OnConnectorAdded?.Invoke(connector);
             connector.CheckForConnection(this);
+        }
+
+        public void AddStorageBox(V2.Data.StorageBox storageBox)
+        {
+            _storeageBoxes.Add(storageBox);
+            MarkDirty();
+            OnStoreageBoxAdded?.Invoke(storageBox);
         }
 
         public void AddBelt(BeltData belt)
@@ -149,6 +161,23 @@ namespace V2.Data
         public List<BeltData> GetBelts()
         {
             return _belts;
+        }
+
+        public StorageBox GetStorageBoxAt(Vector2Int position)
+        {
+            foreach (var storageBox in _storeageBoxes)
+            {
+                if (storageBox.LocalPosition == position)
+                {
+                    return storageBox;
+                }
+            }
+            return null;
+        }
+
+        public IEnumerable<StorageBox> GetStorageBoxes()
+        {
+            return _storeageBoxes;
         }
       
         public BeltData GetBeltAt(Vector2Int pos)

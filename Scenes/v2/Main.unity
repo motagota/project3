@@ -713,6 +713,7 @@ GameObject:
   - component: {fileID: 1374809372}
   - component: {fileID: 1374809373}
   - component: {fileID: 1374809374}
+  - component: {fileID: 1374809375}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -755,6 +756,8 @@ MonoBehaviour:
   completedRecipesText: {fileID: 0}
   progressBar: {fileID: 0}
   enabledToggle: {fileID: 0}
+  inputSlotText: {fileID: 0}
+  outputSlotText: {fileID: 0}
 --- !u!114 &1374809373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -791,6 +794,22 @@ MonoBehaviour:
   previousBeltText: {fileID: 0}
   itemsCountText: {fileID: 0}
   itemsListText: {fileID: 0}
+--- !u!114 &1374809375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1374809369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec92f8f0dd9fab043b1500314e753c61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titleText: {fileID: 0}
+  slotsContainer: {fileID: 0}
+  slotPrefab: {fileID: 0}
+  enabledToggle: {fileID: 0}
 --- !u!1 &1469164074
 GameObject:
   m_ObjectHideFlags: 0

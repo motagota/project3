@@ -32,7 +32,7 @@ namespace V2.Data
         {
             // Mining recipes (for Miner machines)
             AddRecipe("Mine_IronOre", new Recipe(
-                duration: 1.0f,
+                duration: 0.10f,
                 outputItemType: "IronOre",
                 inputItemTypes: new List<string>(),
                 inputItemCount: 0
@@ -71,6 +71,13 @@ namespace V2.Data
                 duration: 2.0f,
                 outputItemType: "IronPlate",
                 inputItemTypes: new List<string> { "IronOre" },
+                inputItemCount: 1
+            ));
+            
+            AddRecipe("CopperOre_to_CopperPlate", new Recipe(
+                duration: 1.0f,
+                outputItemType: "CopperPlate",
+                inputItemTypes: new List<string> { "CopperOre" },
                 inputItemCount: 1
             ));
             

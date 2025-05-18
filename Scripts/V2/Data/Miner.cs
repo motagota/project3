@@ -13,7 +13,7 @@ namespace V2.Data
             
             // Set up a generator recipe that doesn't require inputs
             CurrentRecipe = new Recipe(
-                duration: 3.0f,  // Takes 3 seconds to mine one ore
+                duration: 0.10f,  // Takes 3 seconds to mine one ore
                 outputItemType: _oreType,
                 inputItemTypes: new List<string>(),  // No inputs required
                 inputItemCount: 0
