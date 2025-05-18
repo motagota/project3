@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -11,6 +12,9 @@ namespace V2.Data
    
         private SimulationItem _inputHeldItem;
         private bool canDrop = true;
+        private bool _shouldCheckForItems = true;
+        private string _expectedOutputItemType;
+        
         public bool HasInputItem => _inputHeldItem != null;
         public bool CanDropItem => canDrop;
         
@@ -68,15 +72,33 @@ namespace V2.Data
         {
             bool connectionsChanged = false;
     
-            // Check front connection
             Vector2Int frontPos = GetFrontPosition();
             Entity frontConnection = GetEntityAt(chunk, frontPos);
     
             if (frontConnection != _inputConnector)
             {
+                // Unsubscribe from old connection events
+                if (_inputConnector is Machine oldInputMachine)
+                {
+                    oldInputMachine.OnRecipeCompleted -= HandleInputMachineRecipeCompleted;
+                }
+                
                 _inputConnector = frontConnection;
                 OnConnectionChanged?.Invoke(this, frontConnection);
                 connectionsChanged = true;
+                
+                // Subscribe to new connection events
+                if (_inputConnector is Machine inputMachine)
+                {
+                    inputMachine.OnRecipeCompleted += HandleInputMachineRecipeCompleted;
+                    
+                    // Special handling for Miner machines
+                    if (_inputConnector is Miner miner)
+                    {
+                        _expectedOutputItemType = miner.GetOreType();
+                        _shouldCheckForItems = true;
+                    }
+                }
             }
     
             // Check back connection
@@ -127,28 +149,113 @@ namespace V2.Data
             }
         }
         
+        private void HandleInputMachineRecipeCompleted(Machine machine)
+        {
+            _shouldCheckForItems = true;
+        }
+        
         private void TryPickUpItem()
         {
+            if (!_shouldCheckForItems)
+                return;
+            
             if (_inputConnector is Machine inputMachine)
             {
-                SimulationItem item = inputMachine.TakeItem();
-                if (item != null)
+                if (inputMachine is Miner miner)
                 {
-                    _inputHeldItem = item;
-                    OnItemPickedUp?.Invoke(this, item);
-                    Debug.Log($"Connector {ID} picked up {item} from machine {inputMachine.ID}");
+                    if (inputMachine.HasItem)
+                    {
+                        SimulationItem peekItem = new SimulationItem("1", _expectedOutputItemType);
+                        if (CanOutputAcceptItem(peekItem))
+                        {
+                            SimulationItem item = inputMachine.TakeItem();
+                            if (item != null)
+                            {
+                                _inputHeldItem = item;
+                                OnItemPickedUp?.Invoke(this, item);
+                                Debug.Log($"Connector {ID} picked up {item} from miner {inputMachine.ID}");
+                                _shouldCheckForItems = false; 
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log($"Connector {ID} skipped item from miner {inputMachine.ID} because output cannot accept it");
+                            _shouldCheckForItems = false; 
+                        }
+                    }
+                }
+                else if (inputMachine.HasItem)
+                {
+                    SimulationItem peekItem = inputMachine.TakeItem();
+                    if (peekItem != null)
+                    {
+                        inputMachine.GiveItem(peekItem);
+                     
+                        if (CanOutputAcceptItem(peekItem))
+                        {
+                            SimulationItem item = inputMachine.TakeItem();
+                            if (item != null)
+                            {
+                                _inputHeldItem = item;
+                                OnItemPickedUp?.Invoke(this, item);
+                                Debug.Log($"Connector {ID} picked up {item} from machine {inputMachine.ID}");
+                                _shouldCheckForItems = false; 
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log($"Connector {ID} skipped item from machine {inputMachine.ID} because output cannot accept it");
+                            _shouldCheckForItems = false; 
+                        }
+                    }
                 }
             }
             else if (_inputConnector is BeltData inputBelt)
             {
-                SimulationItem item = inputBelt.TakeItem();
-                if (item != null)
+                Dictionary<SimulationItem, float> items = inputBelt.GetAllItemsWithProgress();
+                SimulationItem firstItem = null;
+                float highestProgress = 0f;
+                foreach (var kvp in items)
                 {
-                    _inputHeldItem = item;
-                    OnItemPickedUp?.Invoke(this, item);
-                    Debug.Log($"Connector {ID} picked up {item} from belt {inputBelt.ID}");
+                    if (kvp.Value > highestProgress)
+                    {
+                        highestProgress = kvp.Value;
+                        firstItem = kvp.Key;
+                    }
+                }
+                
+                if (firstItem != null && highestProgress >= 0.9f)
+                {
+                    if (CanOutputAcceptItem(firstItem))
+                    {
+                        SimulationItem item = inputBelt.TakeItem();
+                        if (item != null)
+                        {
+                            _inputHeldItem = item;
+                            OnItemPickedUp?.Invoke(this, item);
+                            Debug.Log($"Connector {ID} picked up {item} from belt {inputBelt.ID}");
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log($"Connector {ID} skipped item from belt {inputBelt.ID} because output cannot accept it");
+                    }
                 }
             }
+        }
+        
+        private bool CanOutputAcceptItem(SimulationItem item)
+        {
+            if (_outputConnector == null)
+                return false;
+         
+            if (_outputConnector is BeltData)
+                return true;
+             
+            if (_outputConnector is Machine outputMachine)
+                return outputMachine.CanAcceptItem(item);
+                
+            return false;
         }
         
         private void TryDropItem()
@@ -162,6 +269,7 @@ namespace V2.Data
                     OnItemDropped?.Invoke(this, droppedItem);
                     Debug.Log($"Connector {ID} dropped {droppedItem} to machine {outputMachine.ID}");
                     canDrop = true;
+                    _shouldCheckForItems = true; 
                 }
                 else
                 {
@@ -177,6 +285,7 @@ namespace V2.Data
                     OnItemDropped?.Invoke(this, droppedItem);
                     Debug.Log($"Connector {ID} dropped {droppedItem} to belt {outputBelt.ID}");
                     canDrop = true;
+                    _shouldCheckForItems = true; 
                 }
                 else
                 {
@@ -187,6 +296,7 @@ namespace V2.Data
             { 
                 _inputHeldItem = null;
                 canDrop = true;
+                _shouldCheckForItems = true; 
             }
         }
  

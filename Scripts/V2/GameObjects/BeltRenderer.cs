@@ -110,9 +110,21 @@ namespace V2.GameObjects
             {
                 GameObject itemObject = Instantiate(itemPrefab, _startPosition, transform.rotation);
                 _itemObjects[item] = itemObject;
-                
-                // You might want to set the item's appearance based on the SimulationItem properties
-                // For example: itemObject.GetComponent<ItemRenderer>().SetItem(item);
+                Renderer itemRenderer = itemObject.GetComponent<Renderer>();
+        if (itemRenderer != null)
+        {
+            // Create a new material instance to avoid affecting other items
+            Material itemMaterial = new Material(itemRenderer.material);
+            
+            // Set the base color from the item
+            itemMaterial.color = item.ItemColor;
+            
+            // Add emission for glow effect
+            itemMaterial.EnableKeyword("_EMISSION");
+            itemMaterial.SetColor("_EmissionColor", item.ItemColor * 0.5f);
+            
+            itemRenderer.material = itemMaterial;
+        }
             }
         }
         

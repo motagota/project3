@@ -16,7 +16,9 @@ namespace V2.Data
         public bool Stackable;
         public int MaxStackSize;
       
-      
+        // Added color property for visual representation
+        public Color ItemColor = Color.white;
+
         public ItemDefinition(string id, string displayName, string description, string category, bool stackable = true, int maxStackSize = 99)
         {
             Id = id;
@@ -26,11 +28,17 @@ namespace V2.Data
             Stackable = stackable;
             MaxStackSize = maxStackSize;
         }
-        public ItemDefinition Clone()
-        {
-            ItemDefinition clone = new ItemDefinition("1",DisplayName, Description, Category, Stackable, MaxStackSize);
-            
-            return clone;
-        }
+       // Added constructor overload with color parameter
+    public ItemDefinition(string id, string displayName, string description, string category, Color itemColor, bool stackable = true, int maxStackSize = 99)
+        : this(id, displayName, description, category, stackable, maxStackSize)
+    {
+        ItemColor = itemColor;
+    }
+    
+    public ItemDefinition Clone()
+    {
+        ItemDefinition clone = new ItemDefinition("1", DisplayName, Description, Category, ItemColor, Stackable, MaxStackSize);
+        return clone;
+    }
     }
 }
