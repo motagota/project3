@@ -14,6 +14,8 @@ namespace V2.Data
         public int Count => _items.Count;
         public string ItemType => _itemType;
         public bool IsFull => _isStackable ? _items.Count >= _maxStackSize : _items.Count >= 1;
+        public bool IsStackable => _isStackable;
+        public int MaxStackSize => _maxStackSize;
         
         public InventorySlot()
         {

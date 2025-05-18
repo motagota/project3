@@ -236,6 +236,14 @@ namespace V2.UI
             TextMeshProUGUI outputItemText = CreateTextElement(contentArea, "OutputItemText", "Output: ");
             machineUI.outputItemText = outputItemText;
             
+            // Create input slot text (new)
+            TextMeshProUGUI inputSlotText = CreateTextElement(contentArea, "InputSlotText", "Input Slot: Empty (0/0)");
+            machineUI.inputSlotText = inputSlotText;
+            
+            // Create output slot text (new)
+            TextMeshProUGUI outputSlotText = CreateTextElement(contentArea, "OutputSlotText", "Output Slot: Empty (0/0)");
+            machineUI.outputSlotText = outputSlotText;
+            
             // Create completed recipes text
             TextMeshProUGUI completedRecipesText = CreateTextElement(contentArea, "CompletedRecipesText", "Completed: 0");
             machineUI.completedRecipesText = completedRecipesText;

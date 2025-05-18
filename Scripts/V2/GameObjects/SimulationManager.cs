@@ -73,7 +73,8 @@ public class SimulationManagerV2 : MonoBehaviour
         minerConnector1.Rotate(newChunk);
         
         
-        createNewMachine(newChunk,new Vector2Int(15, 6));
+        Machine tmpMachine = createNewMachine(newChunk,new Vector2Int(15, 6));
+        tmpMachine.SetRecipe(RecipeDatabase.Instance.GetRecipe("IronOre_to_IronPlate"));
         
         Connector tmpConnector = createNewConnector(newChunk,new Vector2Int(15, 5));
         tmpConnector.Rotate(newChunk);
@@ -224,13 +225,14 @@ public class SimulationManagerV2 : MonoBehaviour
     }
   
 
-    public void createNewMachine(ChunkData chunk, Vector2Int coords, Recipe recipe = null)
+    public Machine createNewMachine(ChunkData chunk, Vector2Int coords, Recipe recipe = null)
     {
      
         var machine = new Machine(coords);
         if (recipe != null) machine.CurrentRecipe = recipe;
         chunk.AddMachine(machine);
         machine.OnRecipeCompleted += OnMachineCompletedRecipe;
+        return machine;
     }
     
     public Miner createNewMiner(ChunkData chunk, Vector2Int coords, string oreType = "IronOre")

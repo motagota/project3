@@ -17,6 +17,10 @@ namespace V2.UI
         [HideInInspector] public Slider progressBar;
         [HideInInspector] public Toggle enabledToggle;
         
+        // New UI elements for input and output slots
+        [HideInInspector] public TextMeshProUGUI inputSlotText;
+        [HideInInspector] public TextMeshProUGUI outputSlotText;
+        
         private Machine _currentMachine;
         private SimulationManagerV2 _simulationManager;
         
@@ -40,6 +44,7 @@ namespace V2.UI
             {
                 UpdateProgressBar();
                 UpdateCompletedRecipes();
+                UpdateSlotInfo(); // Update slot information every frame
             }
             
             if (Input.GetMouseButtonDown(0) && !IsPointerOverUI())
@@ -123,6 +128,7 @@ namespace V2.UI
             
             UpdateCompletedRecipes();
             UpdateProgressBar();
+            UpdateSlotInfo();
             
             if (enabledToggle != null)
             {
@@ -144,6 +150,33 @@ namespace V2.UI
         {
             if (_currentMachine == null || completedRecipesText == null) return;
             completedRecipesText.text = $"Completed: {_currentMachine.CompletedRecipes}";
+        }
+        
+        private void UpdateSlotInfo()
+        {
+            if (_currentMachine == null) return;
+            
+            // Update input slot information
+            if (inputSlotText != null)
+            {
+                var inputSlot = _currentMachine.InputSlot;
+                if (inputSlot != null)
+                {
+                    string itemType = inputSlot.IsEmpty ? "Empty" : inputSlot.ItemType;
+                    inputSlotText.text = $"Input Slot: {itemType} ({inputSlot.Count}/{(inputSlot.IsStackable ? inputSlot.MaxStackSize : 1)})";
+                }
+            }
+            
+            // Update output slot information
+            if (outputSlotText != null)
+            {
+                var outputSlot = _currentMachine.OutputSlot;
+                if (outputSlot != null)
+                {
+                    string itemType = outputSlot.IsEmpty ? "Empty" : outputSlot.ItemType;
+                    outputSlotText.text = $"Output Slot: {itemType} ({outputSlot.Count}/{(outputSlot.IsStackable ? outputSlot.MaxStackSize : 1)})";
+                }
+            }
         }
         
         private void OnToggleChanged(bool isOn)

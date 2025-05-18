@@ -91,7 +91,7 @@ namespace V2.Data
                 if (_inputConnector is Machine inputMachine)
                 {
                     inputMachine.OnRecipeCompleted += HandleInputMachineRecipeCompleted;
-                    
+                     inputMachine.OnRecipeChanged += HandleInputMachineRecipeChanged;
                     // Special handling for Miner machines
                     if (_inputConnector is Miner miner)
                     {
@@ -149,6 +149,11 @@ namespace V2.Data
             }
         }
         
+        private void HandleInputMachineRecipeChanged(Machine machine, Recipe oldRecipe)
+{
+    _shouldCheckForItems = true;
+}
+
         private void HandleInputMachineRecipeCompleted(Machine machine)
         {
             _shouldCheckForItems = true;

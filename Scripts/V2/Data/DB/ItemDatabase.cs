@@ -36,7 +36,9 @@ namespace V2.Data
                 description: "Raw iron ore extracted from the ground.",
                 category: "RawMaterial",
                 stackable: true,
-                maxStackSize: 50
+                maxStackSize: 50,
+                itemColor: new Color32(90, 90, 90, 255)
+               // 🪨
             ));
             
             AddItem("CopperOre", new ItemDefinition(
@@ -45,7 +47,9 @@ namespace V2.Data
                 description: "Raw copper ore extracted from the ground.",
                 category: "RawMaterial",
                 stackable: true,
-                maxStackSize: 50
+                maxStackSize: 50,
+                itemColor: new Color32(184, 115, 51, 255)
+                //🧲
             ));
             
             AddItem("GoldOre", new ItemDefinition(
@@ -54,7 +58,9 @@ namespace V2.Data
                 description: "Precious gold ore extracted from deep mines.",
                 category: "RawMaterial",
                 stackable: true,
-                maxStackSize: 50
+                maxStackSize: 50,
+                itemColor: new Color32(255, 215, 0, 255)
+                //💎
             ));
             
             AddItem("CoalOre", new ItemDefinition(
@@ -63,7 +69,9 @@ namespace V2.Data
                 description: "Combustible coal ore used for fuel and processing.",
                 category: "RawMaterial",
                 stackable: true,
-                maxStackSize: 50
+                maxStackSize: 50,
+                itemColor: new Color32(28, 28, 28, 255)
+                //🔥
             ));
             
             AddItem("StoneOre", new ItemDefinition(
@@ -72,7 +80,9 @@ namespace V2.Data
                 description: "Basic stone material used for construction.",
                 category: "RawMaterial",
                 stackable: true,
-                maxStackSize: 100
+                maxStackSize: 100,
+                itemColor: new Color32(122, 111, 100, 255)
+                //🪨
             ));
             
             // Processed materials

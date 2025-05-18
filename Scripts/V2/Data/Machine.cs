@@ -11,10 +11,15 @@ namespace V2.Data
         public event Action<Machine> OnRecipeCompleted;
         public event Action<Machine, SimulationItem> OnItemConsumed;
         public event Action<Machine> OnEnabledStateChanged;
+        public event Action<Machine, Recipe> OnRecipeChanged;
 
         public int CompletedRecipes { get; private set; } = 0;
         private InventorySlot _outputSlot = new InventorySlot();
-        private Dictionary<string, List<SimulationItem>> _inputItems = new Dictionary<string, List<SimulationItem>>();
+        private InventorySlot _inputSlot = new InventorySlot();
+        
+        // Accessor methods for input and output slots
+        public InventorySlot InputSlot => _inputSlot;
+        public InventorySlot OutputSlot => _outputSlot;
         
         public bool HasItem => !_outputSlot.IsEmpty;
         
@@ -44,45 +49,68 @@ namespace V2.Data
         {
             base.Tick(dt);
            
+            // 1. Check if the machine is enabled
             if (!IsEnabled)
                 return;
 
+            // 2. Check if we have a recipe
             if (CurrentRecipe == null) return;
             
-            if (CurrentRecipe.InputItemCount > 0)
+            // If we're already cooking (Progress > 0), continue the process
+            if (Progress > 0)
             {
-                _consumptionTimer += dt;
-                if (_consumptionTimer >= CONSUMPTION_RATE)
+                // Process the recipe for the required duration
+                Progress += dt;
+                
+                // When complete, create the output item
+                if (Progress >= CurrentRecipe.Duration)
                 {
-                    _consumptionTimer -= CONSUMPTION_RATE;
-                    ConsumeItems();
-                }
-            }
-            
-            // Only produce if the output slot can accept more items
-            if (!_outputSlot.IsFull)
-            {
-                if (HasRequiredInputItems())
-                {
-                    Progress += dt;
-                    if (Progress >= CurrentRecipe.Duration)
+                    // Only try to create output if the output slot isn't full
+                    if (!_outputSlot.IsFull)
                     {
-                        Progress = 0;
                         CompletedRecipes++;
                         SimulationItem newItem = new SimulationItem("1", CurrentRecipe.OutputItemType);
                         
                         // Add the item to the output slot
                         if (_outputSlot.AddItem(newItem, ItemDatabase.Instance))
                         {
+                            // Notify listeners and log success
                             OnRecipeCompleted?.Invoke(this);
                             Debug.Log("Machine finished and produced: " + newItem);
+                            
+                            // Reset progress to start a new cycle
+                            Progress = 0;
                         }
                         else
                         {
                             Debug.LogWarning("Machine could not add produced item to output slot");
+                            // Don't reset progress, we'll try again next tick
                         }
                     }
+                    else
+                    {
+                        // Output slot is full, wait until it's emptied
+                        Debug.Log("Machine production complete but output slot is full");
+                        // Don't reset progress, we'll try again when output slot is available
+                    }
                 }
+                // Continue cooking, no need to check inputs again
+                return;
+            }
+            
+            // 3. If we're not cooking yet (Progress == 0), check if we can start
+            if (HasRequiredInputItems() && !_outputSlot.IsFull)
+            {
+                // Only consume items if the recipe requires them
+                if (CurrentRecipe.InputItemCount > 0)
+                {
+                    ConsumeItems();
+                    Debug.Log("Starting production with consumed items");
+                }
+                
+                // Start the cooking process
+                Progress += dt;
+                Debug.Log("Starting cooking process");
             }
         }
         
@@ -91,30 +119,28 @@ namespace V2.Data
             if (CurrentRecipe.InputItemCount == 0 || CurrentRecipe.InputItemTypes.Count == 0)
                 return true;
             
-            foreach (string itemType in CurrentRecipe.InputItemTypes)
-            {
-                if (!_inputItems.ContainsKey(itemType) || 
-                    _inputItems[itemType].Count < CurrentRecipe.InputItemCount)
-                {
-                    return false;
-                }
-            }
-            
+            // Check if we have enough items in the input slot
+            if (_inputSlot.IsEmpty || _inputSlot.Count < CurrentRecipe.InputItemCount)
+                return false;
+                
+            // Check if the item type matches what the recipe requires
+            if (!CurrentRecipe.InputItemTypes.Contains(_inputSlot.ItemType))
+                return false;
+                
             return true;
         }
         
         private void ConsumeItems()
         {
-        
             if (!HasRequiredInputItems())
                 return;
-             
-            foreach (string itemType in CurrentRecipe.InputItemTypes)
+            
+            // Consume the required number of items
+            for (int i = 0; i < CurrentRecipe.InputItemCount; i++)
             {
-                if (_inputItems.ContainsKey(itemType) && _inputItems[itemType].Count > 0)
+                SimulationItem consumedItem = _inputSlot.TakeItem();
+                if (consumedItem != null)
                 {
-                    SimulationItem consumedItem = _inputItems[itemType][0];
-                    _inputItems[itemType].RemoveAt(0);
                     OnItemConsumed?.Invoke(this, consumedItem);
                     Debug.Log("Machine consumed: " + consumedItem);
                 }
@@ -130,21 +156,66 @@ namespace V2.Data
         {
             if (CurrentRecipe == null) return false;
             
-            return CurrentRecipe.RequiresItemType(item.ItemType);
+            // Check if the item type is required by the recipe
+            if (!CurrentRecipe.RequiresItemType(item.ItemType))
+                return false;
+                
+            // Check if the input slot can accept this item
+            return _inputSlot.CanAcceptItem(item, ItemDatabase.Instance);
         }
  
         public virtual bool GiveItem(SimulationItem item)
         {
             if (!CanAcceptItem(item))
                 return false;
-          
-            if (!_inputItems.ContainsKey(item.ItemType))
-            {
-                _inputItems[item.ItemType] = new List<SimulationItem>();
-            }
-            _inputItems[item.ItemType].Add(item);
-            return true;
+            
+            return _inputSlot.AddItem(item, ItemDatabase.Instance);
         }
         
+        public void SetRecipe(Recipe newRecipe)
+        {
+            // Don't do anything if the recipe is the same
+            if (CurrentRecipe == newRecipe) return;
+          
+            List<SimulationItem> itemsToGivePlayer = new List<SimulationItem>();
+            
+            // Clear output slot and give items to player
+            while (!_outputSlot.IsEmpty)
+            {
+                SimulationItem item = _outputSlot.TakeItem();
+                if (item != null)
+                {
+                    itemsToGivePlayer.Add(item);
+                }
+            }
+            
+            // Clear input slot and give items to player
+            while (!_inputSlot.IsEmpty)
+            {
+                SimulationItem item = _inputSlot.TakeItem();
+                if (item != null)
+                {
+                    itemsToGivePlayer.Add(item);
+                }
+            }
+            
+            // Set the new recipe
+            Recipe oldRecipe = CurrentRecipe;
+            CurrentRecipe = newRecipe;
+            Progress = 0;
+            
+            // Give collected items to player
+            if (PlayerInventory.Instance != null)
+            {
+                foreach (var item in itemsToGivePlayer)
+                {
+                    PlayerInventory.Instance.AddItem(item);
+                }
+            }
+            
+            // Notify listeners about recipe change
+            OnRecipeChanged?.Invoke(this, oldRecipe);
+            Debug.Log($"Machine {ID} recipe changed from {oldRecipe?.OutputItemType ?? "none"} to {newRecipe?.OutputItemType ?? "none"}");
+        }
     }
 }
