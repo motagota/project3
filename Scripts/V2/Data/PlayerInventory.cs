@@ -35,8 +35,6 @@ namespace V2.Data
             {
                 _slots.Add(new InventorySlot());
             }
-            
-            Debug.Log("Player inventory singleton created");
         }
         
         public bool AddItem(SimulationItem item)

@@ -178,13 +178,12 @@ namespace V2.Data
                             {
                                 _inputHeldItem = item;
                                 OnItemPickedUp?.Invoke(this, item);
-                                Debug.Log($"Connector {ID} picked up {item} from miner {inputMachine.ID}");
                                 _shouldCheckForItems = false; 
                             }
                         }
                         else
                         {
-                            Debug.Log($"Connector {ID} skipped item from miner {inputMachine.ID} because output cannot accept it");
+                           // Debug.Log($"Connector {ID} skipped item from miner {inputMachine.ID} because output cannot accept it");
                             _shouldCheckForItems = false; 
                         }
                     }
@@ -203,13 +202,12 @@ namespace V2.Data
                             {
                                 _inputHeldItem = item;
                                 OnItemPickedUp?.Invoke(this, item);
-                                Debug.Log($"Connector {ID} picked up {item} from machine {inputMachine.ID}");
                                 _shouldCheckForItems = false; 
                             }
                         }
                         else
                         {
-                            Debug.Log($"Connector {ID} skipped item from machine {inputMachine.ID} because output cannot accept it");
+                          //  Debug.Log($"Connector {ID} skipped item from machine {inputMachine.ID} because output cannot accept it");
                             _shouldCheckForItems = false; 
                         }
                     }
@@ -238,12 +236,11 @@ namespace V2.Data
                         {
                             _inputHeldItem = item;
                             OnItemPickedUp?.Invoke(this, item);
-                            Debug.Log($"Connector {ID} picked up {item} from belt {inputBelt.ID}");
                         }
                     }
                     else
                     {
-                        Debug.Log($"Connector {ID} skipped item from belt {inputBelt.ID} because output cannot accept it");
+                       // Debug.Log($"Connector {ID} skipped item from belt {inputBelt.ID} because output cannot accept it");
                     }
                 }
             }
@@ -272,7 +269,6 @@ namespace V2.Data
                     SimulationItem droppedItem = _inputHeldItem;
                     _inputHeldItem = null;
                     OnItemDropped?.Invoke(this, droppedItem);
-                    Debug.Log($"Connector {ID} dropped {droppedItem} to machine {outputMachine.ID}");
                     canDrop = true;
                     _shouldCheckForItems = true; 
                 }
@@ -288,7 +284,6 @@ namespace V2.Data
                     SimulationItem droppedItem = _inputHeldItem;
                     _inputHeldItem = null;
                     OnItemDropped?.Invoke(this, droppedItem);
-                    Debug.Log($"Connector {ID} dropped {droppedItem} to belt {outputBelt.ID}");
                     canDrop = true;
                     _shouldCheckForItems = true; 
                 }
